@@ -19,7 +19,7 @@
 // Appearance settings: appearance.json next to the menus (Settings.qml),
 // changed by the settings window.
 //
-// Environment (each also read under its old name, RING_APP_*):
+// Environment (each also read under its old name, RING_APP_*; with both set, APPRING_* wins):
 //   APPRING_CONFIG_DIR    where menu.json / menu-<name>.json are read from
 //                          (default: $XDG_CONFIG_HOME/appring, or ~/.config/appring;
 //                          the old ~/.config/ring-app while there is no appring)

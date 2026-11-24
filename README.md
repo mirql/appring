@@ -141,7 +141,8 @@ cfg="${XDG_CONFIG_HOME:-$HOME/.config}"
 
 If `appring/` already exists, it is the one read: copy the files you want from
 `ring-app/` into it instead. If you set `RING_APP_CONFIG_DIR` (or `APPRING_CONFIG_DIR`),
-that folder is used as it is: leave it, or move it and change the setting with it. Then
+that folder is used as it is: leave it, or move it and change the setting with it. When
+both an `APPRING_*` and its old `RING_APP_*` name are set, the `APPRING_*` one wins. Then
 point your key binds at `appring/` with `call appring`.
 
 ## Limits
