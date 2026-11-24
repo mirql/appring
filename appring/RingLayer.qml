@@ -464,7 +464,20 @@ Item {
                 height: 24
                 renderStrategy: Canvas.Immediate
                 readonly property string src: button._face.icon ? Quickshell.iconPath(button._face.icon, true) : ""
-                onSrcChanged: if (src !== "") { loadImage(src); if (isImageLoaded(src)) requestPaint(); }
+                // a new face: forget the old one's colour (the palette's until
+                // this one is sampled; it stays so for no icon or a grey one)
+                onSrcChanged: {
+                    if (ringLayer.iconColours[button.index] !== undefined) {
+                        const next = Object.assign({}, ringLayer.iconColours);
+                        delete next[button.index];
+                        ringLayer.iconColours = next;
+                    }
+                    if (src !== "") {
+                        loadImage(src);
+                        if (isImageLoaded(src))
+                            requestPaint();
+                    }
+                }
                 Component.onCompleted: if (src !== "") loadImage(src)
                 onImageLoaded: requestPaint()
                 onPaint: {

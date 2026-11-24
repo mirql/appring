@@ -304,9 +304,13 @@ PanelWindow {
         const m = item.open ?? Settings.groups;
         return (m === "jump" || m === "satellite") ? m : "rotate";
     }
-    // a group's place: the menu, the rings jumped through, its label
+    // a group's place: the menu, then its index in each ring from the top
+    // (labels can repeat, so they are not part of it)
+    function _keyAt(path) {
+        return menuName + ":" + path.join("/");
+    }
     function _rotKey(item) {
-        return [menuName].concat(_stack.map(f => f.label), [item.label]).join("/");
+        return _keyAt(_stack.map(f => f.index).concat([items.indexOf(item)]));
     }
     function _faceIndex(item) {
         const n = item.items.length;
@@ -344,11 +348,19 @@ PanelWindow {
         else if (mode === "shuffle" || mode === "random")
             _setFace(item, (i + 1 + Math.floor(Math.random() * (n - 1))) % n);
     }
-    // "reset" groups show their first item each time the ring opens
+    // "reset" groups, at every depth, show their first item each time the
+    // ring opens (called with the top ring's items)
     function _resetFaces() {
-        for (const it of items)
-            if (it.items && (it.rotation ?? "") === "reset")
-                _setFace(it, 0);
+        const next = Object.assign({}, _rotations);
+        const walk = (list, path) => list.forEach((it, i) => {
+            if (!Array.isArray(it.items))
+                return;
+            if ((it.rotation ?? "") === "reset")
+                next[_keyAt(path.concat([i]))] = 0;
+            walk(it.items, path.concat([i]));
+        });
+        walk(items, []);
+        _rotations = next;
     }
 
     // Switch the ring to a group's items, keeping the way back.
@@ -357,7 +369,7 @@ PanelWindow {
         if (!it || !it.items || !it.items.length)
             return;
         const groupRaw = (it.style && typeof it.style === "object") ? it.style : {};
-        _stack = _stack.concat([{ items: items, styles: mainStyles, label: it.label }]);
+        _stack = _stack.concat([{ items: items, styles: mainStyles, label: it.label, index: index }]);
         const kids = it.items;
         items = kids;
         mainStyles = kids.map(c => _effectiveStyle(c, false, groupRaw, kids.length));
@@ -765,17 +777,12 @@ PanelWindow {
     function _sanitizeItems(rawItems, context) {
         if (!Array.isArray(rawItems))
             return [];
+        // at every depth: a group's items can be groups (jump, rotate)
         return rawItems.filter(it => it && typeof it.label === "string").map(it => {
             if (it.style && typeof it.style === "object")
                 _warnUnknownKeys(it.style, "item \"" + it.label + "\"" + context);
-            if (Array.isArray(it.items)) {
-                const children = it.items.filter(c => c && typeof c.label === "string").map(c => {
-                    if (c.style && typeof c.style === "object")
-                        _warnUnknownKeys(c.style, "item \"" + c.label + "\" (child of \"" + it.label + "\")");
-                    return c;
-                });
-                return Object.assign({}, it, { items: children });
-            }
+            if (Array.isArray(it.items))
+                return Object.assign({}, it, { items: _sanitizeItems(it.items, " (child of \"" + it.label + "\")") });
             return it;
         });
     }
@@ -901,6 +908,30 @@ PanelWindow {
         }));
     }
 
+    // The appearance window changes how groups open, or the ghost ring, while
+    // the ring is open (its preview): faces and the ghost ring follow at once.
+    Connections {
+        target: Settings
+        function onGroupsChanged() {
+            root._hideGhost();
+            root.satellite = null;
+            root._updateFaces();
+            if (root._open) {
+                root._recomputeHighlight();
+                root._dumpState();
+            }
+        }
+        function onGhostChanged() {
+            if (Settings.ghost)
+                return;
+            root._hideGhost();
+            if (root._open) {
+                root._recomputeHighlight();
+                root._dumpState();
+            }
+        }
+    }
+
     // Its screen going away while open closes it.
     Connections {
         target: Quickshell
@@ -958,7 +989,8 @@ PanelWindow {
         id: ghostTimer
         interval: Theme.ghostDelay
         onTriggered: {
-            if (root._open && root._current && root._current.items && !root.satellite) {
+            if (root._open && root._current && root._current.items && !root.satellite
+                    && Settings.ghost && root._groupMode(root._current) !== "satellite") {
                 root._showGhost(root.highlightedIndex);
                 root._dumpState();
             }

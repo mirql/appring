@@ -76,6 +76,17 @@ TOOLS_SAT = [
     sat_item("System monitor", "utilities-system-monitor", "leaf"),
 ]
 
+# menu-nest.json: two groups both labelled Twin; the first holds a group
+# (Inner) whose items have a null before Leaf.
+NEST = [
+    item("Plain", "folder", "leaf"),
+    item("Twin", "folder", "group"),
+    item("Plain 2", "folder", "leaf"),
+    item("Twin", "folder", "group"),
+]
+TWIN_IN = [item("Inner", "folder", "group"), item("B", "text-x-generic", "leaf")]
+INNER_IN = [item("Leaf", "text-x-generic", "leaf")]
+
 SOLO = [item("Solo", "applications-system", "leaf")]
 SUB1 = [item("Sub1", "applications-utilities", "leaf")]
 
@@ -197,6 +208,12 @@ EXPECT = {
     "jumped-back": at(ROOT, 3, False, rotation={3: 2}),
     "nested-closed": closed(),
     "face-ran": closed(),
+    # the wheel turned the second Twin only
+    "twin-turned": at(NEST, 3, False, rotation={1: 0, 3: 1}),
+    # the middle button into the first Twin, then into Inner: the null is gone
+    "twin-jumped": at(TWIN_IN, 0, False, rotation={0: 0}, depth=1),
+    "inner-jumped": at(INNER_IN, 0, False, depth=2),
+    "nest-closed": closed(),
     # No APPRING_CONFIG_DIR: only the old ~/.config/ring-app -> read; both -> appring wins.
     "old-config-folder": at([item("Old", "folder", "leaf")], -1, True),
     "new-config-folder-wins": at([item("New", "folder", "leaf")], -1, True),

@@ -510,6 +510,42 @@ at $right $cy   # throwaway
 at $satL $cy
 ipc commit
 dump face-ran
+# Two groups with the same label keep their own faces (a face is kept by the
+# group's place); a group inside a group, with a bad entry, still opens.
+cat > "$APPRING_CONFIG_DIR/menu-nest.json" <<'MENUJSON'
+[
+  { "label": "Plain", "icon": "folder", "run": ["notify-send", "plain"] },
+  { "label": "Twin", "icon": "folder", "items": [
+    { "label": "Inner", "icon": "folder", "items": [
+      null,
+      { "label": "Leaf", "icon": "text-x-generic", "run": ["notify-send", "leaf"] }
+    ] },
+    { "label": "B", "icon": "text-x-generic", "run": ["notify-send", "b"] }
+  ] },
+  { "label": "Plain 2", "icon": "folder", "run": ["notify-send", "plain 2"] },
+  { "label": "Twin", "icon": "folder", "items": [
+    { "label": "C", "icon": "text-x-generic", "run": ["notify-send", "c"] },
+    { "label": "D", "icon": "text-x-generic", "run": ["notify-send", "d"] }
+  ] }
+]
+MENUJSON
+at $cx $cy
+ipc open "nest"
+at $cx $cy
+at $cx $down   # throwaway
+at $satL $cy
+ptr scroll 1
+dump twin-turned
+at $right $cy
+click middle
+at $cx $up
+dump twin-jumped
+click middle
+dump inner-jumped
+key -k Escape
+key -k Escape
+key -k Escape
+dump nest-closed
 printf '{ "groups": "satellite" }\n' > "$APPRING_CONFIG_DIR/appearance.json"
 sleep 1
 
