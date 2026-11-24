@@ -40,7 +40,8 @@ Singleton {
         console.warn("appring: reading the old config folder " + _configBase + "/ring-app; move it to " + _configBase + "/appring");
     FolderListModel {
         id: _configFolders
-        folder: "file://" + root._configBase
+        // a file URL, with "#", "?" and "%" in the path encoded
+        folder: "file://" + encodeURI(root._configBase).replace(/#/g, "%23").replace(/\?/g, "%3F")
         showDirs: true
         showFiles: false
         showHidden: true

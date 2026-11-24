@@ -72,6 +72,9 @@ PanelWindow {
 
     // ── settings ──────────────────────────────────────────────────────
     readonly property string _configDir: Settings.configDir
+    // The folder is found asynchronously at start (Settings.qml): an open that
+    // came first reads the menu again from the right one.
+    on_ConfigDirChanged: if (root._open) root._reloadConfig()
     readonly property string _defaultConfigPath: Quickshell.shellDir + "/default.json"
     readonly property bool _dump: Settings.env("DUMP") === "1"
 

@@ -155,6 +155,7 @@ export FAKE_APP_LOG="$D/radial-runs.log"
 ROOT="$G_HERE/appring"
 HYPRLAND_INSTANCE_SIGNATURE="$SIG" APPRING_DUMP=1 QT_QPA_PLATFORM=wayland QT_QUICK_BACKEND=software \
   quickshell -p "$ROOT" > "$D/quickshell.log" 2>&1 &
+QS_PID=$!
 pids+=($!)
 sleep 4
 
@@ -462,6 +463,36 @@ ipc settings
 sleep 1.5
 shot settings "0,0 2400x1500"
 ipc settings
+
+# Which config folder, with no APPRING_CONFIG_DIR: the ring is restarted
+# twice, each time reading a folder of its own config home. With only the old
+# ~/.config/ring-app it reads that (and says once it can be moved); with both,
+# ~/.config/appring wins.
+restart_with_config_home() {
+  kill "$QS_PID" 2>/dev/null || true; wait "$QS_PID" 2>/dev/null || true
+  env -u APPRING_CONFIG_DIR XDG_CONFIG_HOME="$1" HYPRLAND_INSTANCE_SIGNATURE="$SIG" APPRING_DUMP=1 \
+    QT_QPA_PLATFORM=wayland QT_QUICK_BACKEND=software \
+    quickshell -p "$ROOT" >> "$D/quickshell.log" 2>&1 &
+  QS_PID=$!
+  pids+=($!)
+  sleep 4
+}
+mkdir -p "$D/home-old/ring-app" "$D/home-both/ring-app" "$D/home-both/appring"
+echo '[{ "label": "Old", "icon": "folder", "run": ["true"] }]' > "$D/home-old/ring-app/menu.json"
+echo '[{ "label": "Old", "icon": "folder", "run": ["true"] }]' > "$D/home-both/ring-app/menu.json"
+echo '[{ "label": "New", "icon": "folder", "run": ["true"] }]' > "$D/home-both/appring/menu.json"
+restart_with_config_home "$D/home-old"
+at $cx $cy
+ipc open ""
+at $cx $cy
+dump old-config-folder
+ipc cancel
+restart_with_config_home "$D/home-both"
+at $cx $cy
+ipc open ""
+at $cx $cy
+dump new-config-folder-wins
+ipc cancel
 
 cp "$D/radial.log" "$G_OUT/radial.log"
 cp "$FAKE_APP_LOG" "$G_OUT/radial-runs.log"

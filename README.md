@@ -131,8 +131,10 @@ Settings by environment: `APPRING_RELEASE_KEY` (`Super`, `Alt`, `Ctrl`, `Shift`)
 
 Coming from ring-app, appring's earlier name? Nothing breaks: the `RING_APP_*` names, the
 IPC target `ring` and the folder `~/.config/ring-app/` (while there is no
-`~/.config/appring/`) still work. To move: `mv ~/.config/ring-app ~/.config/appring`, and
-point your key binds at `appring/` with `call appring`.
+`~/.config/appring/`) still work. To move: if there is no `~/.config/appring/` yet,
+`mv ~/.config/ring-app ~/.config/appring`; if there is, it is the one read, so copy the
+files you want from `ring-app/` into it. Then point your key binds at `appring/` with
+`call appring`.
 
 ## Limits
 

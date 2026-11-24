@@ -169,6 +169,9 @@ EXPECT = {
     "named-menu": at(SUB1, -1, True),
     "named-missing": at([], -1, True),
     "closed-by-old-target": closed(),
+    # No APPRING_CONFIG_DIR: only the old ~/.config/ring-app -> read; both -> appring wins.
+    "old-config-folder": at([item("Old", "folder", "leaf")], -1, True),
+    "new-config-folder-wins": at([item("New", "folder", "leaf")], -1, True),
 
     "corner-open-exact-centre": at(ROOT, -1, True, cx=CORNER_X, cy=CORNER_Y),
     "corner-highlight-right": at(ROOT, 1, False, cx=CORNER_X, cy=CORNER_Y),
@@ -308,6 +311,13 @@ def main(radial_path, runs_path, quickshell_path, timing_path):
     else:
         bad += 1
         print(f"radial: unknown style key warning check failed: {detail}")
+
+    hints = len(re.findall(r"appring: reading the old config folder", quickshell_text))
+    if hints != 1:
+        bad += 1
+        print(f"radial: expected the old-folder hint exactly once (only the old folder there), found {hints}")
+    else:
+        print("radial: the old config folder hint shows once, and only with the old folder alone")
 
     ok, detail = check_close_grace(timing_path)
     if ok:
