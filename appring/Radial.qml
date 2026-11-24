@@ -928,6 +928,17 @@ PanelWindow {
         function settings(): void { root.settingsRequested(); }
     }
 
+    // The key straight from Hyprland, no process to start (an `ipc` call takes
+    // 70-100 ms): bind it with `global, appring:ring`. Held down: the default
+    // menu opens; let go: the highlighted item runs.
+    GlobalShortcut {
+        appid: "appring"
+        name: "ring"
+        description: "appring: hold to open, release to run"
+        onPressed: root.open("")
+        onReleased: root.commit()
+    }
+
     Timer {
         id: groupTimer
         interval: root._restMs
@@ -1049,6 +1060,20 @@ PanelWindow {
             anchors.fill: parent
             hoverEnabled: true
             acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
+            // The pointer is over the window as soon as it shows: take its
+            // place at once, without waiting for the mouse to move.
+            onEntered: {
+                if (root._open && !root._centreEstablished) {
+                    root._pointerX = mouseX;
+                    root._pointerY = mouseY;
+                    root.centreX = Settings.atCursor ? mouseX : root.width / 2;
+                    root.centreY = Settings.atCursor ? mouseY : root.height / 2;
+                    root._centreEstablished = true;
+                    root._hasPointer = true;
+                    root._dumpState();
+                    root._recomputeHighlight();
+                }
+            }
             onPositionChanged: mouse => {
                 root._pointerX = mouse.x;
                 root._pointerY = mouse.y;

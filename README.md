@@ -77,9 +77,13 @@ put it there). On Hyprland:
 
 ```ini
 exec-once = appring run
-bind  = SUPER, grave, exec, appring open
-bindr = SUPER, grave, exec, appring commit
+bind = SUPER, grave, global, appring:ring
 ```
+
+The bind is a Hyprland global shortcut: appring hears the key's press (it opens) and
+its release (the highlighted item runs) straight from Hyprland, with no command to
+start each time. On other compositors, bind the press to `appring open` and the
+release to `appring commit`.
 
 `appring help` lists the commands: `run`, `open [NAME]`, `commit`, `cancel`,
 `toggle [NAME]`, `settings`, `stop`, `restart`. `open` and `settings` start it when it is
@@ -87,13 +91,16 @@ not running. The package also installs a desktop entry ("appring", it opens the
 appearance window) and the icons.
 
 Without Nix, or from a checkout: you need [Quickshell](https://quickshell.org) on your
-`PATH`. The same three lines then call Quickshell with the checkout's `appring` folder:
+`PATH`, and start it with the checkout's `appring` folder (the bind stays the same):
 
 ```ini
 exec-once = quickshell -p /path/to/appring/appring -d
-bind  = SUPER, grave, exec, quickshell ipc -p /path/to/appring/appring call appring open ""
-bindr = SUPER, grave, exec, quickshell ipc -p /path/to/appring/appring call appring commit
+bind = SUPER, grave, global, appring:ring
 ```
+
+On other compositors, bind the press to
+`quickshell ipc -p /path/to/appring/appring call appring open ""` and the release to
+`... call appring commit`.
 
 appring draws its own opening and closing; turn off Hyprland's layer animation for it,
 or Hyprland shrinks and fades its full-screen layer on top, which looks like the ring
