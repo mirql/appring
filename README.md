@@ -25,7 +25,7 @@
 key or click to run that item. Groups open as a smaller ring around their own
 button. Esc or a right click cancels; releasing in the centre does nothing. The
 items are apps and commands from a JSON file you write. It is the kind of menu
-OPie made popular in World of Warcraft, for your desktop.
+[OPie](https://www.townlong-yak.com/addons/opie) made popular in World of Warcraft, for your desktop.
 
 ```bash
 git clone https://github.com/mirql/appring && cd appring
@@ -163,6 +163,13 @@ Thanks to everyone who makes appring what it is
 
 Helped in a way that isn't a commit? Comment on any issue or PR:
 `@all-contributors please add @name for ideas, review` (and so on).
+
+## Thanks
+
+appring's idea comes from [OPie](https://www.townlong-yak.com/addons/opie), the ring
+menu addon for World of Warcraft by foxlit ([Townlong Yak](https://www.townlong-yak.com),
+[Patreon](https://www.patreon.com/foxlit)). appring is its own project, not affiliated
+with OPie, and uses none of its code or art.
 
 ## License
 
