@@ -34,6 +34,8 @@ Item {
     readonly property real chevronAngle: mainLayer.chevronAngle
     readonly property var mainColours: mainLayer.iconColours
     readonly property var satColours: satLayer.iconColours
+    // changes on a jump into a group, or back: the main ring zooms in again
+    property int zoomKey: 0
     property var presetMain: ({})
     property var presetSat: ({})
 
@@ -43,6 +45,7 @@ Item {
         presetColours: root.presetMain
         spin: root.spin >= 0 ? root.spin : _ownSpin
         faces: root.faces
+        zoomKey: root.zoomKey
         items: root.items
         styles: root.styles
         highlighted: root.highlighted

@@ -370,7 +370,10 @@ PanelWindow {
         mainStyles = f.styles;
         _afterSwitch();
     }
+    // counts jumps and backs: the live ring zooms in again on each
+    property int _switches: 0
     function _afterSwitch() {
+        _switches++;
         satellite = null;
         ghostIndex = -1;
         ghost = null;
@@ -985,30 +988,38 @@ PanelWindow {
             }
         }
 
-        // the ring that just closed, fading away
-        Ring {
+        // The ring that just closed, fading away: made afresh at each close,
+        // already in place, so nothing in it animates in (the open zoom, a
+        // button's grow) while it fades out.
+        Loader {
             anchors.fill: parent
-            visible: !!root._fade
-            items: root._fade ? root._fade.items : []
-            styles: root._fade ? root._fade.styles : []
-            highlighted: root._fade ? root._fade.highlighted : -1
-            deadZone: root._fade ? root._fade.deadZone : true
-            centreX: root._fade ? root._fade.centreX : -1
-            centreY: root._fade ? root._fade.centreY : -1
-            pointerAngle: root._fade ? root._fade.pointerAngle : 0
-            ringVisible: !!root._fade
-            satellite: root._fade ? root._fade.satellite : null
-            faces: root._fade ? root._fade.faces : []
-            ghost: root._fade ? root._fade.ghost : null
-            ghostHighlighted: root._fade ? root._fade.ghostHighlighted : -1
-            flashGhost: root._fade ? root._fade.flashGhost : -1
-            closeT: root._fadeT
-            closeMs: root._fade ? root._fade.ms : 0
-            flashMain: root._fade ? root._fade.flashMain : -1
-            flashSat: root._fade ? root._fade.flashSat : -1
-            presetMain: root._fade ? root._fade.mainColours : ({})
-            presetSat: root._fade ? root._fade.satColours : ({})
-            spin: root.spinAngle
+            active: !!root._fade
+            sourceComponent: Component {
+            Ring {
+                anchors.fill: parent
+                visible: !!root._fade
+                items: root._fade ? root._fade.items : []
+                styles: root._fade ? root._fade.styles : []
+                highlighted: root._fade ? root._fade.highlighted : -1
+                deadZone: root._fade ? root._fade.deadZone : true
+                centreX: root._fade ? root._fade.centreX : -1
+                centreY: root._fade ? root._fade.centreY : -1
+                pointerAngle: root._fade ? root._fade.pointerAngle : 0
+                ringVisible: !!root._fade
+                satellite: root._fade ? root._fade.satellite : null
+                faces: root._fade ? root._fade.faces : []
+                ghost: root._fade ? root._fade.ghost : null
+                ghostHighlighted: root._fade ? root._fade.ghostHighlighted : -1
+                flashGhost: root._fade ? root._fade.flashGhost : -1
+                closeT: root._fadeT
+                closeMs: root._fade ? root._fade.ms : 0
+                flashMain: root._fade ? root._fade.flashMain : -1
+                flashSat: root._fade ? root._fade.flashSat : -1
+                presetMain: root._fade ? root._fade.mainColours : ({})
+                presetSat: root._fade ? root._fade.satColours : ({})
+                spin: root.spinAngle
+            }
+            }
         }
 
         // the live ring: hidden the moment the menu closes (the fading copy
@@ -1017,6 +1028,7 @@ PanelWindow {
             id: liveRing
             anchors.fill: parent
             visible: root._open
+            zoomKey: root._switches
             spin: root.spinAngle
             items: root.items
             styles: root.mainStyles

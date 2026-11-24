@@ -130,11 +130,10 @@ Item {
             spread = 1;
         }
     }
-    onItemsChanged: {
-        iconColours = ({});   // other items: their colours are sampled afresh
-        if (ringVisible && Theme.open > 0 && items.length)
-            rezoom.restart();
-    }
+    onItemsChanged: iconColours = ({})   // other items: their colours are sampled afresh
+    // a jump into a group, or back (Ring.zoomKey): zoom in again
+    property int zoomKey: 0
+    onZoomKeyChanged: if (ringVisible && Theme.open > 0) rezoom.restart()
     NumberAnimation {
         id: rezoom
         target: ringLayer
