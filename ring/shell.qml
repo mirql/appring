@@ -12,8 +12,12 @@
 //   quickshell ipc -p ring call ring commit          # for a key-release bind
 //   quickshell ipc -p ring call ring cancel
 //   quickshell ipc -p ring call ring toggle ""
+//   quickshell ipc -p ring call ring settings        # the appearance window (again: closes)
 // Quickshell's IPC caller does not fill in a missing argument: pass "" for
 // the default menu, never omit it.
+//
+// Appearance settings: appearance.json next to the menus (Settings.qml),
+// changed by the settings window.
 //
 // Environment:
 //   RING_APP_CONFIG_DIR    where menu.json / menu-<name>.json are read from
@@ -23,12 +27,23 @@
 //   RING_APP_REST_MS       how long resting on a group opens it (default 250)
 //   RING_APP_CLOSE_MS      how long a satellite's close condition must hold
 //                          before it closes (default 150)
-//   RING_APP_REDUCED_MOTION=1   no animations
+//   RING_APP_REDUCED_MOTION=1   no animations, whatever the settings say
 //   RING_APP_DUMP=1        log one `ring-app state <json>` line per change,
 //                          for the tests (tools/check-radial.py)
 
 import Quickshell
 
 ShellRoot {
-    Radial {}
+    // No reloading on file changes: a running ring keeps what it started
+    // with (restart it to pick up a change).
+    settings.watchFiles: false
+
+    Radial {
+        id: radial
+        onSettingsRequested: settings.toggle()
+    }
+    SettingsWindow {
+        id: settings
+        radial: radial
+    }
 }

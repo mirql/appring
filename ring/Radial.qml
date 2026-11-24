@@ -2,10 +2,12 @@
 // overlay on the focused monitor.
 //
 // Selection by angle, over the whole screen: the window tracks the pointer
-// everywhere, and the active item is the one whose 360/N-wide sector the
-// pointer's direction from the centre falls in (0 = up, clockwise;
-// `_sliceOf`). A dead zone (Theme.radialDeadZone, a radius around the
-// centre) is never active: committing there cancels.
+// everywhere, and the active item is the one whose sector the pointer's
+// direction from the centre falls in (0 = up, clockwise; `_sliceOf`). Each
+// sector is 360/N wide, a fraction of it (Theme.radialSliceGap) a gap at its
+// borders: pointing between two items selects nothing. A dead zone
+// (Theme.radialDeadZone, a radius around the centre) is never active either:
+// committing there, or in a gap, cancels.
 //
 // The centre is the cursor: the first real pointer position after `open()`
 // becomes the ring's centre for that session, exactly, never clamped. Near
@@ -69,11 +71,7 @@ PanelWindow {
     WlrLayershell.keyboardFocus: visible ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
 
     // ── settings ──────────────────────────────────────────────────────
-    readonly property string _home: Quickshell.env("HOME") ?? ""
-    readonly property string _xdgConfig: Quickshell.env("XDG_CONFIG_HOME") ?? ""
-    readonly property string _configDirOverride: Quickshell.env("RING_APP_CONFIG_DIR") ?? ""
-    readonly property string _configDir: _configDirOverride !== "" ? _configDirOverride
-        : ((_xdgConfig !== "" ? _xdgConfig : _home + "/.config") + "/ring-app")
+    readonly property string _configDir: Settings.configDir
     readonly property string _defaultConfigPath: Quickshell.shellDir + "/default.json"
     readonly property bool _dump: Quickshell.env("RING_APP_DUMP") === "1"
 
@@ -120,11 +118,47 @@ PanelWindow {
     // The config's global style, not merged with defaults (a satellite's
     // defaults differ, see `_baseStyle`).
     property var _globalStyleRaw: ({})
-    readonly property var _styleKeys: ["shape", "cornerRadius", "size", "glowColor", "glowSize", "ringRadius", "captionSize", "backdrop"]
+    readonly property var _styleKeys: ["shape", "cornerRadius", "size", "glowColor", "glowSize", "ringRadius", "captionSize", "caption", "backdrop"]
     property var _unknownWarned: null   // a Set, reset on every config parse
 
+    // `ipc call ring settings`: shell.qml opens or closes the settings window.
+    signal settingsRequested()
+
     readonly property var _current: (highlightedIndex >= 0 && highlightedIndex < items.length) ? items[highlightedIndex] : null
-    readonly property string centerLabel: deadZone || !_current ? "Cancel" : (_current.label ?? "")
+
+    // Open or closed, as far as picking goes. The window stays up a moment
+    // longer after a close, while the ring fades away (`_fade`).
+    property bool _open: false
+    // What was on screen when the ring closed, drawn fading out by its own
+    // Ring (closing animation); null when nothing is fading.
+    property var _fade: null
+    property real _fadeT: 0
+    // one clock for the centre ring's turn, shared by the live ring and the
+    // closing copy, so the turn carries on when the ring closes
+    property real spinAngle: 0
+    NumberAnimation on spinAngle {
+        from: 0
+        to: 360
+        duration: Math.max(1, Theme.centreSpinMs)
+        loops: Animation.Infinite
+        running: root.visible && !Theme.reducedMotion && Theme.centreSpinMs > 0
+    }
+    NumberAnimation {
+        id: fadeOut
+        target: root
+        property: "_fadeT"
+        from: 0
+        to: 1
+        duration: 1
+        onFinished: root._endFade()
+    }
+    function _endFade() {
+        fadeOut.stop();
+        _fade = null;
+        _fadeT = 0;
+        if (!_open)
+            visible = false;
+    }
 
     // ── opening / closing ────────────────────────────────────────────
     // Quickshell can list a placeholder screen with no name and no size.
@@ -146,6 +180,8 @@ PanelWindow {
         const target = _focusedScreen();
         if (!target)
             return;
+        _endFade();
+        _open = true;
         screen = target;
         menuName = name ?? "";
         satellite = null;
@@ -164,7 +200,7 @@ PanelWindow {
     }
 
     function toggle(name) {
-        if (visible)
+        if (_open)
             cancel();
         else
             open(name);
@@ -175,10 +211,15 @@ PanelWindow {
     }
 
     function commit() {
-        if (!visible)
+        if (!_open)
             return;
         if (satellite) {
-            if (satellite.deadZone || satellite.highlighted < 0) {
+            if (!satellite.deadZone && satellite.highlighted < 0) {
+                // In a gap between the satellite's items: nothing to run.
+                cancel();
+                return;
+            }
+            if (satellite.deadZone) {
                 // On the group's own button: back to the main ring, not a
                 // cancel of the whole menu.
                 satellite = null;
@@ -187,7 +228,7 @@ PanelWindow {
                 return;
             }
             _run(satellite.items[satellite.highlighted]);
-            _close();
+            _close({ sat: satellite.highlighted });
             return;
         }
         if (deadZone || !_current) {
@@ -199,11 +240,30 @@ PanelWindow {
             return;
         }
         _run(_current);
-        _close();
+        _close({ main: highlightedIndex });
     }
 
-    function _close() {
-        visible = false;
+    // `ran`: the item just run, { main: index } or { sat: index }: it flashes.
+    function _close(ran) {
+        const flashing = !!ran && Theme.flashMs > 0;
+        const ms = Math.max(Theme.closeMs, flashing ? Theme.flashMs : 0);
+        if (_open && _centreEstablished && items.length > 0 && ms > 0) {
+            // keep drawing what was there, going away, while picking is over
+            _fade = {
+                items: items, styles: mainStyles, highlighted: highlightedIndex, deadZone: deadZone,
+                centreX: centreX, centreY: centreY, pointerAngle: liveRing.chevronAngle, satellite: satellite,
+                mainColours: liveRing.mainColours, satColours: liveRing.satColours,
+                ms: ms,
+                flashMain: flashing && ran.main !== undefined ? ran.main : -1,
+                flashSat: flashing && ran.sat !== undefined ? ran.sat : -1
+            };
+            _open = false;
+            fadeOut.duration = ms;
+            fadeOut.restart();
+        } else {
+            _open = false;
+            _endFade();
+        }
         items = [];
         mainStyles = [];
         satellite = null;
@@ -233,14 +293,13 @@ PanelWindow {
     // Where the main-ring button at `index` sits, by its own ringRadius.
     function _mainButtonPos(index) {
         const angleRad = (index * (360 / items.length)) * Math.PI / 180;
-        const r = mainStyles[index]?.ringRadius ?? Theme.radialIconRadius;
+        const r = mainStyles[index]?.ringRadius ?? Theme.ringRadiusFor(items.length);
         return { x: centreX + r * Math.sin(angleRad), y: centreY - r * Math.cos(angleRad) };
     }
 
-    // Past this distance a group opens on its own: the button's ringRadius
-    // plus the same margin as Theme's default outer radius.
+    // Past this distance a group opens on its own.
     function _outerThreshold(ringRadius) {
-        return ringRadius + (Theme.radialRingRadius - Theme.radialIconRadius);
+        return ringRadius + Theme.radialOuterMargin;
     }
 
     function _openSatellite(index) {
@@ -249,13 +308,13 @@ PanelWindow {
             return;
         const pos = _mainButtonPos(index);
         const groupStyleRaw = (item.style && typeof item.style === "object") ? item.style : {};
-        const styles = item.items.map(child => _effectiveStyle(child, true, groupStyleRaw));
+        const styles = item.items.map(child => _effectiveStyle(child, true, groupStyleRaw, item.items.length));
         const margin = Theme.radialDeadZone + Math.max(...styles.map(s => s.ringRadius + s.size)) + 20;
         // The main ring's resolved style for the button that opened this
         // satellite, kept on the frame so every later check uses the same
         // numbers.
-        const mainStyle = mainStyles[index] ?? _baseStyle(false);
-        const mainRingRadius = mainStyle.ringRadius ?? Theme.radialIconRadius;
+        const mainStyle = mainStyles[index] ?? _baseStyle(false, items.length);
+        const mainRingRadius = mainStyle.ringRadius ?? Theme.ringRadiusFor(items.length);
         const sliceWidth = items.length > 0 ? 360 / items.length : 360;
         satellite = {
             parentIndex: index,
@@ -286,17 +345,19 @@ PanelWindow {
 
     // ── style cascade ─────────────────────────────────────────────────
 
-    function _baseStyle(inSatellite) {
+    // `count`: how many buttons share the ring (its radius grows with them).
+    function _baseStyle(inSatellite, count) {
         const scale = inSatellite ? Theme.radialSatelliteScale : 1;
         return {
             shape: "rounded-square",
             cornerRadius: Theme.radialCornerFraction,
             size: Math.round(Theme.radialButtonSize * scale),
-            glowColor: "accent",
+            glowColor: "auto",
             glowSize: Math.round(Theme.radialGlowPad * scale),
-            ringRadius: Math.round(Theme.radialIconRadius * scale),
-            captionSize: Math.round(Theme.fontSmall * scale),
-            backdrop: true
+            ringRadius: Math.round(Theme.ringRadiusFor(count) * scale),
+            captionSize: Math.round(Theme.fontSmall * Theme.s * scale),
+            caption: Settings.labels,
+            backdrop: false
         };
     }
 
@@ -325,8 +386,8 @@ PanelWindow {
 
     // Defaults, then the global style, then (in a satellite) the opening
     // group's style, then the item's own.
-    function _effectiveStyle(item, inSatellite, groupStyleRaw) {
-        let s = _baseStyle(inSatellite);
+    function _effectiveStyle(item, inSatellite, groupStyleRaw, count) {
+        let s = _baseStyle(inSatellite, count);
         s = _mergeStyle(s, _globalStyleRaw);
         if (inSatellite && groupStyleRaw)
             s = _mergeStyle(s, groupStyleRaw);
@@ -337,11 +398,17 @@ PanelWindow {
     // ── angle math ────────────────────────────────────────────────────
 
     // 0deg = up, clockwise: atan2(dx, -dy) measures from "up", positive to
-    // the right. Used by the main ring and the satellite alike.
+    // the right. Used by the main ring and the satellite alike. `idx` is -1
+    // in the gap between two items.
     function _sliceOf(dx, dy, count) {
         const angle = (Math.atan2(dx, -dy) * 180 / Math.PI + 360) % 360;
         const sliceWidth = 360 / count;
-        return { angle: angle, idx: Math.floor(((angle + sliceWidth / 2) % 360) / sliceWidth) };
+        const idx = Math.floor(((angle + sliceWidth / 2) % 360) / sliceWidth);
+        let off = Math.abs(angle - idx * sliceWidth);
+        if (off > 180)
+            off = 360 - off;
+        const inGap = count > 1 && off > sliceWidth / 2 * (1 - Theme.radialSliceGap);
+        return { angle: angle, idx: inGap ? -1 : idx };
     }
 
     function _recomputeHighlight() {
@@ -440,7 +507,7 @@ PanelWindow {
             groupTimer.restart();
         }
         const cur = items[mainIdx];
-        const ringRadius = mainStyles[mainIdx]?.ringRadius ?? Theme.radialIconRadius;
+        const ringRadius = mainStyles[mainIdx]?.ringRadius ?? Theme.ringRadiusFor(items.length);
         if (cur && cur.items && mdist > _outerThreshold(ringRadius) && !_pastOuterHandled) {
             _pastOuterHandled = true;
             _openSatellite(mainIdx);
@@ -496,7 +563,7 @@ PanelWindow {
     function _applyConfig(parsed) {
         _globalStyleRaw = parsed.styleRaw;
         items = parsed.items;
-        mainStyles = items.map(it => _effectiveStyle(it, false, null));
+        mainStyles = items.map(it => _effectiveStyle(it, false, null, items.length));
         satellite = null;
         highlightedIndex = -1;
         deadZone = true;
@@ -539,7 +606,7 @@ PanelWindow {
         return {
             shape: s.shape, cornerRadius: s.cornerRadius, size: s.size,
             glowColor: s.glowColor, glowSize: s.glowSize, ringRadius: s.ringRadius,
-            captionSize: s.captionSize, backdrop: s.backdrop
+            captionSize: s.captionSize, caption: s.caption, backdrop: s.backdrop
         };
     }
 
@@ -548,7 +615,7 @@ PanelWindow {
             label: it.label,
             icon: it.icon ?? "",
             kind: it.items ? "group" : "leaf",
-            style: _styleDump(styles[i] ?? _baseStyle(false))
+            style: _styleDump(styles[i] ?? _baseStyle(false, its.length))
         }));
     }
 
@@ -560,7 +627,7 @@ PanelWindow {
         if (!root._dump)
             return;
         console.info("ring-app state " + JSON.stringify({
-            visible: root.visible,
+            visible: root._open,
             items: root._itemsDump(root.items, root.mainStyles),
             highlighted: root.highlightedIndex,
             deadZone: root.deadZone,
@@ -581,7 +648,7 @@ PanelWindow {
     Connections {
         target: Quickshell
         function onScreensChanged() {
-            if (root.visible && !root._realScreens().includes(root.screen))
+            if (root._open && !root._realScreens().includes(root.screen))
                 root.cancel();
         }
     }
@@ -592,6 +659,7 @@ PanelWindow {
         function commit(): void { root.commit(); }
         function cancel(): void { root.cancel(); }
         function toggle(name: string): void { root.toggle(name); }
+        function settings(): void { root.settingsRequested(); }
     }
 
     Timer {
@@ -642,13 +710,39 @@ PanelWindow {
             }
         }
 
+        // the ring that just closed, fading away
         Ring {
             anchors.fill: parent
+            visible: !!root._fade
+            items: root._fade ? root._fade.items : []
+            styles: root._fade ? root._fade.styles : []
+            highlighted: root._fade ? root._fade.highlighted : -1
+            deadZone: root._fade ? root._fade.deadZone : true
+            centreX: root._fade ? root._fade.centreX : -1
+            centreY: root._fade ? root._fade.centreY : -1
+            pointerAngle: root._fade ? root._fade.pointerAngle : 0
+            ringVisible: !!root._fade
+            satellite: root._fade ? root._fade.satellite : null
+            closeT: root._fadeT
+            closeMs: root._fade ? root._fade.ms : 0
+            flashMain: root._fade ? root._fade.flashMain : -1
+            flashSat: root._fade ? root._fade.flashSat : -1
+            presetMain: root._fade ? root._fade.mainColours : ({})
+            presetSat: root._fade ? root._fade.satColours : ({})
+            spin: root.spinAngle
+        }
+
+        // the live ring: hidden the moment the menu closes (the fading copy
+        // above takes over), so nothing is drawn from its reset centre
+        Ring {
+            id: liveRing
+            anchors.fill: parent
+            visible: root._open
+            spin: root.spinAngle
             items: root.items
             styles: root.mainStyles
             highlighted: root.highlightedIndex
             deadZone: root.deadZone
-            centerLabel: root.centerLabel
             centreX: root.centreX
             centreY: root.centreY
             pointerAngle: root._pointerAngle
@@ -663,10 +757,13 @@ PanelWindow {
             onPositionChanged: mouse => {
                 root._pointerX = mouse.x;
                 root._pointerY = mouse.y;
+                if (!root._open)
+                    return;   // closed, the ring fading away
                 if (!root._centreEstablished) {
-                    // The first position this session is the centre, exactly.
-                    root.centreX = mouse.x;
-                    root.centreY = mouse.y;
+                    // The first position this session is the centre, exactly
+                    // (or the middle of the screen, "Open at the cursor" off).
+                    root.centreX = Settings.atCursor ? mouse.x : root.width / 2;
+                    root.centreY = Settings.atCursor ? mouse.y : root.height / 2;
                     root._centreEstablished = true;
                     root._dumpState();
                 }

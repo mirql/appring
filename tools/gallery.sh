@@ -182,20 +182,22 @@ key() { wtype -s 150 "$@" -s 100; sleep 0.3; }
 # HEADLESS-1's logical centre (2400x1500).
 cx=1200; cy=750
 up=$((cy - 150)); down=$((cy + 150)); left=$((cx - 150)); right=$((cx + 150))
-farleft=$((cx - 300))            # past the outer radius (150+70=220): opens a group by itself
-# Either side of the Firefox/Terminal boundary (45deg) at radius ~150, 5deg
-# off it each way: enough margin to never ride on rounding.
-b0x=$((cx + 96)); b0y=$((cy - 115))   # 40deg: still Firefox
-b1x=$((cx + 115)); b1y=$((cy - 96))   # 50deg: already Terminal
-# A group's satellite centres on its own button: with 4 items and the
-# default ringRadius 150, the item at index 3 (270deg) sits at ($left, $cy).
-# The points below were worked out against Radial.qml's angle formula: each
-# stays inside the main ring's "still this group" sector, except satClose,
-# which lands inside the main ring's dead zone on purpose.
+farleft=$((cx - 300))            # past the outer radius (110+70=180): opens a group by itself
+# Firefox's and Terminal's sectors (4 items: 90deg each), 18deg either side
+# of their border at 45deg, at radius ~150: still inside them when the
+# "Gap between slices" setting is on (below).
+b0x=$((cx + 68)); b0y=$((cy - 134))   # 27deg: still Firefox
+b1x=$((cx + 134)); b1y=$((cy - 68))   # 63deg: Terminal
+# A group's satellite centres on its own button: with 4 items the ring's
+# radius is 110 (its minimum), so the item at index 3 (270deg) sits at
+# ($satL, $cy). The points below were worked out against Radial.qml's angle
+# formula: each stays inside the main ring's "still this group" sector,
+# except satClose, which lands inside the main ring's dead zone on purpose.
+satL=$((cx - 110))
 satUp=$((cy - 90))                       # satellite 0deg: its first item
-satMidX=$((left + 60)); satMidY=$((cy + 60))   # satellite ~123deg: its second item
-satDownY=$((cy + 90))                    # satellite 180deg: its last item
-satCloseX=$((left + 90))                 # 90px right of the satellite centre: inside the main dead zone
+satMidX=$((satL + 60)); satMidY=$((cy + 60))   # satellite ~135deg: its second item
+satLastX=$((satL - 64)); satLastY=$((cy + 64))   # satellite 225deg: its last item (3 items: 240deg, 2 items: 180deg)
+satCloseX=$((cx - 30))                   # 30px left of the main centre: inside its dead zone (40px)
 # A throwaway move used right after a satellite opens (see below): outside
 # both dead zones, still in the main ring's Tools sector.
 satDispX=$((cx - 250)); satDispY=$cy
@@ -218,6 +220,25 @@ at $cx $down;  dump highlight-files
 at $left $cy;  dump highlight-tools
 at $b0x $b0y;  dump boundary-before
 at $b1x $b1y;  dump boundary-after
+# The appearance settings (appearance.json, read when it changes): labels
+# for every slice show in the resolved style; with a gap between slices,
+# exactly on a border (45deg) nothing is highlighted, and committing there
+# runs nothing. Then back to the defaults.
+ipc cancel
+printf '{ "labels": "all", "sliceGap": 0.33 }\n' > "$RING_APP_CONFIG_DIR/appearance.json"
+sleep 1
+at $cx $cy
+ipc open ""
+at $cx $cy
+dump labels-all
+at $((cx + 106)) $((cy - 106)); dump slice-gap
+ipc commit
+dump slice-gap-cancelled
+printf '{ "labels": "none", "sliceGap": 0 }\n' > "$RING_APP_CONFIG_DIR/appearance.json"
+sleep 1
+at $cx $cy
+ipc open ""
+at $cx $cy
 
 # The dead zone: nothing highlighted; committing there cancels, nothing runs.
 at $((cx + 20)) $cy; dump dead-zone
@@ -248,16 +269,16 @@ at $satDispX $satDispY
 
 # On or near the group's own button (1.2x its size), the satellite stays
 # open and nothing inside is highlighted, across several 1-5px jitters.
-at $((left + 2)) $cy;              dump satellite-jitter-1
-at $((left - 3)) $((cy + 1));      dump satellite-jitter-2
-at $((left + 1)) $((cy - 2));      dump satellite-jitter-3
-at $((left - 2)) $((cy + 4));      dump satellite-jitter-4
-at $left $cy;                      dump satellite-jitter-5
+at $((satL + 2)) $cy;              dump satellite-jitter-1
+at $((satL - 3)) $((cy + 1));      dump satellite-jitter-2
+at $((satL + 1)) $((cy - 2));      dump satellite-jitter-3
+at $((satL - 2)) $((cy + 4));      dump satellite-jitter-4
+at $satL $cy;                      dump satellite-jitter-5
 
-at $left $satUp;              dump satellite-child-hello
+at $satL $satUp;              dump satellite-child-hello
 shot radial-satellite-open "900,375 600x750"
 at $satMidX $satMidY;         dump satellite-child-calculator
-at $left $satDownY;           dump satellite-child-monitor
+at $satLastX $satLastY;           dump satellite-child-monitor
 
 # Back toward the main centre closes it, but only once the grace has passed:
 # one checkpoint inside the grace (still open), one well past it (closed).
@@ -291,7 +312,7 @@ at $left $cy
 click left
 dump satellite-opened-click
 at $satDispX $satDispY   # throwaway, as above
-at $left $satUp
+at $satL $satUp
 dump satellite-leaf-committed-ipc-setup
 ipc commit
 dump satellite-leaf-committed-ipc
@@ -305,7 +326,7 @@ at $left $cy
 sleep 1.8
 dump satellite-opened-rest
 at $satDispX $satDispY   # throwaway
-at $left $satDownY
+at $satLastX $satLastY
 click left
 dump satellite-leaf-committed-click
 sleep 0.3
@@ -316,7 +337,7 @@ ipc open ""
 at $cx $cy
 at $farleft $cy
 at $satDispX $satDispY   # throwaway, as above
-at $left $cy
+at $satL $cy
 dump satellite-stays-open-at-own-button
 
 # ...and committing there goes back to the main ring (the menu stays open),
@@ -428,10 +449,16 @@ at $farleft $cy
 # and a later look may already see the settled position.
 quick_dump style-weird-satellite-opened
 at $satDispX $satDispY   # throwaway, as above
-at $left $satUp;     dump style-child-a
+at $satL $satUp;     dump style-child-a
 shot radial-satellite-style "900,375 600x750"
-at $left $satDownY;  dump style-child-b
+at $satLastX $satLastY;  dump style-child-b
 ipc cancel
+
+# The settings window: opens over IPC, draws its preview, closes again.
+ipc settings
+sleep 1.5
+shot settings "0,0 2400x1500"
+ipc settings
 
 cp "$D/radial.log" "$G_OUT/radial.log"
 cp "$FAKE_APP_LOG" "$G_OUT/radial-runs.log"

@@ -20,7 +20,7 @@
 >
 > — **Askar**, author of appring
 
-**appring** is a radial menu. Hold a key: a ring of buttons appears around the pointer. Point in a direction
+**appring** is a radial menu. Hold a key: a ring of icon buttons appears around the pointer, each in its own colour. Point in a direction
 (the whole slice of the screen counts, never a small target), then release the
 key or click to run that item. Groups open as a smaller ring around their own
 button. Esc or a right click cancels; releasing in the centre does nothing. The
@@ -96,8 +96,34 @@ from the same folder.
 - `icon` is an icon name from your icon theme.
 - `items` makes a group: its items open as a smaller ring. Groups go one level deep.
 - `style` (top level, per group, per item): `shape` (`rounded-square` or
-  `circle`), `cornerRadius`, `size`, `glowColor` (`accent`, `ok`, `warn`,
-  `error`, `muted`, `dim`, `text`), `glowSize`, `ringRadius`, `captionSize`.
+  `circle`), `cornerRadius`, `size`, `glowColor` (the slice's colour: `auto`,
+  a `#rrggbb`, or `accent`, `ok`, `warn`, `error`, `muted`, `dim`, `text`),
+  `glowSize`, `ringRadius`, `caption` (`none`, `selected`, `all`),
+  `captionSize`, `backdrop` (`true`: a soft halo behind the ring).
+
+## Appearance
+
+`quickshell ipc -p ring call ring settings` opens the appearance window (or add it to
+your menu as an item). It shows a live preview, and saves to
+`~/.config/ring-app/appearance.json` at once:
+
+| Setting | Default |
+|---|---|
+| Ring scale | 1.0 (0.5 to 2) |
+| Open at the cursor (off: the middle of the screen) | on |
+| Animate transitions | on |
+| Closing: fade, zoom (shrinks to the centre), spiral (buttons swirl outward), none | fade |
+| Flash on run: the item you run flashes briefly | on |
+| Instant pointer rotation (off: the chevron swings round to the cursor) | off |
+| Enlarge selected slice | on |
+| Colours from icons (off: a fixed palette) | on |
+| Slice labels: none, selected, all | none |
+| Centre spin, seconds per turn (0: still) | 4 |
+| Gap between slices, where nothing is selected | 0 |
+| Dead zone around the centre, px | 40 |
+| Speeds, ms: opening, closing, run flash, focus change, glow fade, button grow | 250, 180, 300, 180, 300, 100 |
+| Chevron speed (how fast it swings round) | 1.0x |
+| Glow strength; flash pop (how much the button grows) | 0.75; +30% |
 
 Settings by environment: `RING_APP_RELEASE_KEY` (`Super`, `Alt`, `Ctrl`, `Shift`),
 `RING_APP_REST_MS` (resting on a group opens it, default 250),

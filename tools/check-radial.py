@@ -27,17 +27,18 @@ import sys
 
 # ── resolved styles (Radial.qml's `_baseStyle`/`_effectiveStyle`) ─────────
 # In step with Theme.qml's defaults (radialButtonSize 48, radialGlowPad 10,
-# radialIconRadius 150, fontSmall 11, radialCornerFraction 0.18,
-# radialSatelliteScale 0.72): if those change, this changes too.
+# radialMinRadius 110 (4 items or fewer), fontSmall 11, radialCornerFraction
+# 0.14, radialSatelliteScale 0.8) and Radial.qml's `_baseStyle` (glowColor "auto",
+# caption "none", backdrop false): if those change, this changes too.
 def style(in_satellite=False, **overrides):
     if in_satellite:
-        s = {"shape": "rounded-square", "cornerRadius": 0.18, "size": 35,
-             "glowColor": "accent", "glowSize": 7, "ringRadius": 108,
-             "captionSize": 8, "backdrop": True}
+        s = {"shape": "rounded-square", "cornerRadius": 0.14, "size": 38,
+             "glowColor": "auto", "glowSize": 8, "ringRadius": 88,
+             "captionSize": 9, "caption": "none", "backdrop": False}
     else:
-        s = {"shape": "rounded-square", "cornerRadius": 0.18, "size": 48,
-             "glowColor": "accent", "glowSize": 10, "ringRadius": 150,
-             "captionSize": 11, "backdrop": True}
+        s = {"shape": "rounded-square", "cornerRadius": 0.14, "size": 48,
+             "glowColor": "auto", "glowSize": 10, "ringRadius": 110,
+             "captionSize": 11, "caption": "none", "backdrop": False}
     s.update(overrides)
     return s
 
@@ -57,6 +58,9 @@ ROOT = [
     item("Files", "system-file-manager", "leaf"),
     item("Tools", "applications-utilities", "group"),
 ]
+
+# The same, with the "labels": "all" setting.
+ROOT_ALL = [dict(i, style=dict(i["style"], caption="all")) for i in ROOT]
 
 # Tools' items, in order, at the satellite's scaled defaults.
 TOOLS_SAT = [
@@ -87,8 +91,8 @@ WEIRD_SAT = [
 # and jump ones is opened with the cursor at its centre.
 CX, CY = 1200, 750
 # A satellite centres on its group's button: index 3 of 4 (270deg) at
-# radius 150 is (CX - 150, CY), gallery.sh's ($left, $cy).
-SAT_CX, SAT_CY = CX - 150, CY
+# radius 110 is (CX - 110, CY), gallery.sh's ($satL, $cy).
+SAT_CX, SAT_CY = CX - 110, CY
 # Corner: opened right at (20, 15) — the centre, exactly, never clamped.
 CORNER_X, CORNER_Y = 20, 15
 # The jump test's two centres, used nowhere else in the scene.
@@ -120,6 +124,9 @@ EXPECT = {
     "highlight-tools": at(ROOT, 3, False),
     "boundary-before": at(ROOT, 0, False),
     "boundary-after": at(ROOT, 1, False),
+    "labels-all": at(ROOT_ALL, -1, True),
+    "slice-gap": at(ROOT_ALL, -1, False),
+    "slice-gap-cancelled": closed(),
     "dead-zone": at(ROOT, -1, True),
     "dead-zone-cancelled": closed(),
     "esc-cancelled": closed(),
