@@ -564,6 +564,16 @@ at $cx $down;  dump ghost-group-back
 key -k Escape
 key -k Escape
 dump ghost-group-closed
+# toggle closes from inside a group, not one ring back
+at $cx $cy
+ipc open "nest"
+at $cx $cy
+at $cx $down   # throwaway
+at $right $cy
+click middle
+at $cx $up;  dump toggle-jumped
+ipc toggle ""
+dump toggle-closed
 printf '{ "groups": "satellite" }\n' > "$APPRING_CONFIG_DIR/appearance.json"
 sleep 1
 
@@ -602,6 +612,40 @@ ipc open ""
 at $cx $cy
 dump new-config-folder-wins
 ipc cancel
+# A menu read while open (here: ~/.config/appring appears, so the folder
+# changes) starts at the new menu's top: the ghost ring showing, or the ring
+# jumped into, goes, and Esc cannot go back into the old menu.
+mkdir -p "$D/home-late/ring-app"
+cat > "$D/home-late/ring-app/menu.json" <<'MENUJSON'
+[
+  { "label": "Old", "icon": "folder", "run": ["true"] },
+  { "label": "Old group", "icon": "folder", "items": [
+    { "label": "Old A", "icon": "text-x-generic", "run": ["true"] },
+    { "label": "Old B", "icon": "text-x-generic", "run": ["true"] }
+  ] }
+]
+MENUJSON
+new_menu() {
+  mkdir -p "$D/home-late/appring"
+  echo '[{ "label": "New", "icon": "folder", "run": ["true"] }]' > "$D/home-late/appring/menu.json"
+}
+restart_with_config_home "$D/home-late"
+at $cx $cy
+ipc open ""
+at $cx $cy
+at $right $cy   # throwaway
+at $cx $down
+sleep 1.6;  dump late-ghost
+new_menu
+sleep 1;    dump late-read-ghost
+rm -rf "$D/home-late/appring"
+sleep 1
+click middle
+dump late-jumped
+new_menu
+sleep 1;    dump late-read-jumped
+key -k Escape
+dump late-closed
 
 cp "$D/radial.log" "$G_OUT/radial.log"
 cp "$FAKE_APP_LOG" "$G_OUT/radial-runs.log"

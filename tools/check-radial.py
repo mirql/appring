@@ -87,6 +87,12 @@ NEST = [
 TWIN_IN = [item("Inner", "folder", "group"), item("B", "text-x-generic", "leaf")]
 INNER_IN = [item("Leaf", "text-x-generic", "leaf")]
 
+# the late-read scene: the old folder's menu (a group at the bottom), its
+# group's items, and the new folder's menu
+LATE_OLD = [item("Old", "folder", "leaf"), item("Old group", "folder", "group")]
+LATE_OLD_IN = [item("Old A", "text-x-generic", "leaf"), item("Old B", "text-x-generic", "leaf")]
+LATE_NEW = [item("New", "folder", "leaf")]
+
 SOLO = [item("Solo", "applications-system", "leaf")]
 SUB1 = [item("Sub1", "applications-utilities", "leaf")]
 
@@ -221,9 +227,18 @@ EXPECT = {
     # Esc goes back through Twin (pointer down: B)
     "ghost-group-back": at(TWIN_IN, 1, False, rotation={0: 0}, depth=1),
     "ghost-group-closed": closed(),
+    "toggle-jumped": at(TWIN_IN, 0, False, rotation={0: 0}, depth=1),
+    "toggle-closed": closed(),
     # No APPRING_CONFIG_DIR: only the old ~/.config/ring-app -> read; both -> appring wins.
     "old-config-folder": at([item("Old", "folder", "leaf")], -1, True),
     "new-config-folder-wins": at([item("New", "folder", "leaf")], -1, True),
+    # a menu read while open: the ghost ring goes; the jumped-into ring goes,
+    # and Esc then closes (pointer down: the bottom item of each ring)
+    "late-ghost": at(LATE_OLD, 1, False, rotation={1: 0}, ghost=1),
+    "late-read-ghost": at(LATE_NEW, 0, False),
+    "late-jumped": at(LATE_OLD_IN, 1, False, depth=1),
+    "late-read-jumped": at(LATE_NEW, 0, False),
+    "late-closed": closed(),
 
     "corner-open-exact-centre": at(ROOT, -1, True, cx=CORNER_X, cy=CORNER_Y),
     "corner-highlight-right": at(ROOT, 1, False, cx=CORNER_X, cy=CORNER_Y),
@@ -367,10 +382,13 @@ def main(radial_path, runs_path, quickshell_path, timing_path):
         bad += 1
         print(f"radial: unknown style key warning check failed: {detail}")
 
-    hints = len(re.findall(r"appring: reading the old config folder", quickshell_text))
-    if hints != 1:
+    # per config home (gallery.sh): home-old has only the old folder, home-both
+    # has both (home-late, the late-read scene, switches between them)
+    hints_old = len(re.findall(r"appring: reading the old config folder \S*/home-old/ring-app", quickshell_text))
+    hints_both = len(re.findall(r"appring: reading the old config folder \S*/home-both/ring-app", quickshell_text))
+    if hints_old != 1 or hints_both != 0:
         bad += 1
-        print(f"radial: expected the old-folder hint exactly once (only the old folder there), found {hints}")
+        print(f"radial: expected the old-folder hint once with only the old folder, never with both; found {hints_old} and {hints_both}")
     else:
         print("radial: the old config folder hint shows once, and only with the old folder alone")
 
