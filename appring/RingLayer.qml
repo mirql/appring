@@ -118,10 +118,16 @@ Item {
     // lands somewhere else.
     // Set by hand, not bound: it zooms in when the ring shows and again when an
     // open ring gets new items (a jump, or back); it snaps back when hidden.
+    // Off for the closing copy: it is shown already in place, so nothing in it
+    // animates in (no zoom, no grow, no fade-in): it only goes away.
+    property bool animateOpen: true
+    readonly property bool _animIn: ringVisible && animateOpen
     property real spread: 1
-    Component.onCompleted: spread = ringVisible ? 1 : Theme.zoomFrom
+    Component.onCompleted: spread = (ringVisible || !animateOpen) ? 1 : Theme.zoomFrom
     onRingVisibleChanged: {
-        if (!ringVisible) {
+        if (!animateOpen) {
+            spread = 1;
+        } else if (!ringVisible) {
             rezoom.stop();
             spread = Theme.zoomFrom;
         } else if (Theme.open > 0) {
@@ -158,7 +164,7 @@ Item {
         height: d
         opacity: ringLayer.ringVisible ? 1 : 0
         Behavior on opacity {
-            enabled: ringLayer.ringVisible
+            enabled: ringLayer._animIn
             NumberAnimation { duration: Theme.fast }
         }
         ShapePath {
@@ -226,11 +232,11 @@ Item {
         scale: (ringLayer.ringVisible ? 1 : Theme.zoomFrom) * (ringLayer._spiral ? 1 + 0.25 * ringLayer._goneEased : ringLayer._zoom ? 1 - ringLayer._goneEased : 1)
         opacity: (ringLayer.ringVisible ? 1 : 0) * (1 - ringLayer._goneEased)
         Behavior on scale {
-            enabled: ringLayer.ringVisible
+            enabled: ringLayer._animIn
             NumberAnimation { duration: Theme.open; easing.type: Easing.OutQuad }
         }
         Behavior on opacity {
-            enabled: ringLayer.ringVisible
+            enabled: ringLayer._animIn
             NumberAnimation { duration: Theme.open * 0.6 }
         }
 
@@ -424,11 +430,11 @@ Item {
             opacity: (ringLayer.ringVisible ? 1 : 0) * _dim
                      * (_flashing ? (_fp < 0.55 ? 1 : 1 - (_fp - 0.55) / 0.45) : 1 - _g)
             Behavior on scale {
-                enabled: ringLayer.ringVisible
+                enabled: ringLayer._animIn
                 NumberAnimation { duration: Theme.fast; easing.type: Theme.easing }
             }
             Behavior on opacity {
-                enabled: ringLayer.ringVisible
+                enabled: ringLayer._animIn
                 NumberAnimation { duration: Theme.open * 0.6 }
             }
 

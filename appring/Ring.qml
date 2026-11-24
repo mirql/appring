@@ -36,12 +36,15 @@ Item {
     readonly property var satColours: satLayer.iconColours
     // changes on a jump into a group, or back: the main ring zooms in again
     property int zoomKey: 0
+    // false for the closing copy: nothing in it animates in (see RingLayer)
+    property bool animateOpen: true
     property var presetMain: ({})
     property var presetSat: ({})
 
     RingLayer {
         id: mainLayer
         anchors.fill: parent
+        animateOpen: root.animateOpen
         presetColours: root.presetMain
         spin: root.spin >= 0 ? root.spin : _ownSpin
         faces: root.faces
@@ -64,6 +67,7 @@ Item {
     RingLayer {
         id: satLayer
         anchors.fill: parent
+        animateOpen: root.animateOpen
         presetColours: root.presetSat
         visible: !!root.satellite
         items: root.satellite ? root.satellite.items : []
@@ -86,6 +90,7 @@ Item {
     RingLayer {
         id: ghostLayer
         anchors.fill: parent
+        animateOpen: root.animateOpen
         property var g: root.ghost
         visible: opacity > 0.01
         // a preview, a little faint; full when the pointer is in it

@@ -997,6 +997,7 @@ PanelWindow {
             sourceComponent: Component {
             Ring {
                 anchors.fill: parent
+                animateOpen: false
                 visible: !!root._fade
                 items: root._fade ? root._fade.items : []
                 styles: root._fade ? root._fade.styles : []
