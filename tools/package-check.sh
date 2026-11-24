@@ -45,6 +45,14 @@ trap 'kill $sway_pid 2>/dev/null || true' EXIT
 for _ in $(seq 40); do grep -q ^WAYLAND_DISPLAY= "$XDG_RUNTIME_DIR/sway.env" 2>/dev/null && break; sleep 0.25; done
 export WAYLAND_DISPLAY; WAYLAND_DISPLAY=$(sed -n 's/^WAYLAND_DISPLAY=//p' "$XDG_RUNTIME_DIR/sway.env")
 export APPRING_DUMP=1 QT_QPA_PLATFORM=wayland QT_QUICK_BACKEND=software
+# Every command the default menu runs is a stub that writes down its name, so a
+# check can tell that nothing was started.
+stubs="$XDG_RUNTIME_DIR/stubs" ran="$XDG_RUNTIME_DIR/ran.log"
+mkdir -p "$stubs"
+for c in $(grep -o '"run": *\["[^"]*"' "$shell/default.json" | sed 's/.*\["//; s/"$//' | sort -u); do
+  printf '#!/bin/sh\necho %s >> %s\n' "$c" "$ran" > "$stubs/$c"; chmod +x "$stubs/$c"
+done
+export PATH="$stubs:$PATH"
 
 running() { quickshell ipc -p "$shell" show >/dev/null 2>&1; }
 last_state() { quickshell log -p "$shell" 2>/dev/null | grep -o 'appring state .*' | tail -n 1; }
@@ -56,7 +64,16 @@ last_state | grep -q '"visible":true' && ok "open shows the menu" || bad "open: 
 "$bin" cancel && sleep 0.8
 last_state | grep -q '"visible":false' && ok "cancel closes it" || bad "cancel: $(last_state | cut -c1-120)"
 "$bin" settings && sleep 1 && "$bin" settings && sleep 0.5 && ok "settings opens and closes" || bad "settings"
-"$bin" commit && ok "commit with nothing open is harmless" || bad "commit"
+"$bin" commit && sleep 0.8
+[ ! -s "$ran" ] && ok "commit with nothing open starts nothing" || bad "commit with nothing open started: $(tr '\n' ' ' < "$ran")"
+# two at once start one instance (the lock in the command)
+"$bin" stop && sleep 0.8
+"$bin" run & r1=$!
+"$bin" run & r2=$!
+wait $r1 $r2
+sleep 1
+n=$(quickshell list -p "$shell" -j 2>/dev/null | grep -oi '"pid"' | wc -l)
+[ "$n" = 1 ] && ok "two runs at once start one instance" || bad "two runs at once: $n instances"
 errors=$(quickshell log -p "$shell" 2>/dev/null | grep -E "TypeError|ReferenceError|Unable to assign|Failed to load|binding loop" || true)
 [ -z "$errors" ] && ok "no QML errors" || bad "QML errors: $errors"
 "$bin" stop && sleep 0.8

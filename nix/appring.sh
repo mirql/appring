@@ -3,6 +3,7 @@
 set -euo pipefail
 
 quickshell=@quickshell@/bin/quickshell
+flock=@flock@/bin/flock
 shell=@out@/share/appring/appring    # the app: a Quickshell root
 version=@version@
 
@@ -28,21 +29,33 @@ usage: appring [COMMAND]
   restart       stop, then start
   version       print the version
 
-Menus and appearance: \${XDG_CONFIG_HOME:-~/.config}/appring/. On Hyprland:
+Menus and appearance: \${XDG_CONFIG_HOME:-~/.config}/appring/. On Hyprland
+(with appring installed, so the command is on PATH):
   bind  = SUPER, grave, exec, appring open
   bindr = SUPER, grave, exec, appring commit
 EOF
 }
 
 running() { "$quickshell" ipc -p "$shell" show >/dev/null 2>&1; }
-start() { running || "$quickshell" -p "$shell" -d >/dev/null; }
+# Start it unless it runs, and wait until it answers. A lock makes two callers at
+# once (a key pressed while the session starts it) start one instance, not two:
+# the second waits, then finds it running.
+start() {
+  running && return 0
+  local lock
+  lock="${XDG_RUNTIME_DIR:-/tmp}/appring-$(id -u).lock"
+  (
+    "$flock" 9
+    if ! running; then
+      "$quickshell" -p "$shell" -d >/dev/null 9>&-   # it must not hold the lock
+      for _ in $(seq 50); do running && break; sleep 0.1; done
+    fi
+  ) 9>"$lock"
+}
 call() { "$quickshell" ipc -p "$shell" call appring "$@"; }
 # a call that also starts appring first when it is not running
 call_started() {
-  if ! running; then
-    start
-    for _ in $(seq 50); do running && break; sleep 0.1; done
-  fi
+  start
   call "$@"
 }
 

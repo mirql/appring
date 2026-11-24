@@ -6,6 +6,7 @@
   stdenvNoCC,
   bash,
   quickshell,
+  util-linux,
 }:
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "appring";
@@ -32,6 +33,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     substitute nix/appring.sh $out/bin/appring \
       --subst-var-by bash ${bash} \
       --subst-var-by quickshell ${quickshell} \
+      --subst-var-by flock ${util-linux} \
       --subst-var-by out $out \
       --subst-var-by version ${finalAttrs.version}
     chmod +x $out/bin/appring

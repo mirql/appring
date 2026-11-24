@@ -71,7 +71,9 @@ environment.systemPackages = [ inputs.appring.packages.${pkgs.system}.default ];
 ```
 
 Then start it with your session and bind a key to open it, and the key's release to run
-the highlighted item. On Hyprland:
+the highlighted item. These lines call the `appring` command, so it has to be on your
+`PATH`: installed with `nix profile install` or as a NixOS package (`nix run` does not
+put it there). On Hyprland:
 
 ```ini
 exec-once = appring run
@@ -84,9 +86,14 @@ bindr = SUPER, grave, exec, appring commit
 not running. The package also installs a desktop entry ("appring", it opens the
 appearance window) and the icons.
 
-Without Nix: you need [Quickshell](https://quickshell.org) on your `PATH`; from a
-checkout, `quickshell -p appring -d` starts it and
-`quickshell ipc -p /path/to/appring/appring call appring open ""` opens it.
+Without Nix, or from a checkout: you need [Quickshell](https://quickshell.org) on your
+`PATH`. The same three lines then call Quickshell with the checkout's `appring` folder:
+
+```ini
+exec-once = quickshell -p /path/to/appring/appring -d
+bind  = SUPER, grave, exec, quickshell ipc -p /path/to/appring/appring call appring open ""
+bindr = SUPER, grave, exec, quickshell ipc -p /path/to/appring/appring call appring commit
+```
 
 ## Your menu
 
