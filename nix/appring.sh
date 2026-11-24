@@ -31,8 +31,9 @@ usage: appring [COMMAND]
 
 Menus and appearance: \${XDG_CONFIG_HOME:-~/.config}/appring/. On Hyprland
 (with appring installed, so the command is on PATH):
-  bind  = SUPER, grave, exec, appring open
-  bindr = SUPER, grave, exec, appring commit
+  exec-once = appring run
+  bind = SUPER, grave, global, appring:ring    # press opens, release runs
+Elsewhere, bind the key to \`appring open\` and its release to \`appring commit\`.
 EOF
 }
 
