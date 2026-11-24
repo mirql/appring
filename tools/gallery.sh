@@ -546,6 +546,24 @@ key -k Escape
 key -k Escape
 key -k Escape
 dump nest-closed
+# A group picked from a ghost ring opens: the first Twin (right) turned to B,
+# so its ghost ring (2 slots, radius 34, centre 147px right of the main
+# centre; slot 0 points back) holds Inner, 181px right of the centre.
+at $cx $cy
+ipc open "nest"
+at $cx $cy
+at $cx $down   # throwaway
+at $((cx + 110)) $cy
+ptr scroll 1
+sleep 1.6
+at $((cx + 181)) $cy; dump ghost-group-pick
+ipc commit
+dump ghost-group-jumped
+key -k Escape
+at $cx $down;  dump ghost-group-back
+key -k Escape
+key -k Escape
+dump ghost-group-closed
 printf '{ "groups": "satellite" }\n' > "$APPRING_CONFIG_DIR/appearance.json"
 sleep 1
 

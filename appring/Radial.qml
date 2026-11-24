@@ -263,7 +263,10 @@ PanelWindow {
             // an item of the ghost ring: run it, and it becomes the group's face
             const g = items[ghostIndex], child = ghost.items[ghostHighlighted];
             if (child.items) {
+                // a group in the ghost ring: into its owner, then into it (so
+                // Esc goes back through the owner)
                 _jump(ghostIndex);
+                _jump(items.indexOf(child));
                 return;
             }
             _run(child);

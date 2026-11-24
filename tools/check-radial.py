@@ -214,6 +214,13 @@ EXPECT = {
     "twin-jumped": at(TWIN_IN, 0, False, rotation={0: 0}, depth=1),
     "inner-jumped": at(INNER_IN, 0, False, depth=2),
     "nest-closed": closed(),
+    # the first Twin turned to B (the second keeps its turn: "remember"); its
+    # ghost ring holds Inner; releasing on it goes into Twin, then Inner
+    "ghost-group-pick": at(NEST, 1, False, rotation={1: 1, 3: 1}, ghost=1, ghost_hl=0),
+    "ghost-group-jumped": at(INNER_IN, 0, False, depth=2),
+    # Esc goes back through Twin (pointer down: B)
+    "ghost-group-back": at(TWIN_IN, 1, False, rotation={0: 0}, depth=1),
+    "ghost-group-closed": closed(),
     # No APPRING_CONFIG_DIR: only the old ~/.config/ring-app -> read; both -> appring wins.
     "old-config-folder": at([item("Old", "folder", "leaf")], -1, True),
     "new-config-folder-wins": at([item("New", "folder", "leaf")], -1, True),
