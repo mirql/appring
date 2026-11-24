@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 0.1.0
+
+- A package (`nix run github:mirql/appring`, `nix profile install github:mirql/appring`):
+  the `appring` command (`run`, `open`, `commit`, `cancel`, `toggle`, `settings`, `stop`,
+  `restart`; `open` and `settings` start it when needed), a desktop entry and the icons.
 - The code names follow the app's name: the folder `appring/` (was `ring/`), the config
   folder `~/.config/appring/`, the environment `APPRING_*`, the IPC target `appring`, the
   layer namespace `appring`. The old ones still work: `RING_APP_*`, the IPC target

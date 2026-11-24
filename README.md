@@ -36,10 +36,10 @@ just commit                          # run the highlighted item (bind this to th
 ```
 
 > [!NOTE]
-> appring is young (0.1, unreleased). It runs on Linux under Wayland, built on
+> appring is young (0.1). It runs on Linux under Wayland, built on
 > [Quickshell](https://quickshell.org). For now we build and test it under Hyprland;
 > other compositors have not been tried yet. macOS and Windows are planned, not started.
-> There is no package yet: you run it from a checkout.
+> It is packaged for Nix; other packages are not there yet.
 
 ## Why
 
@@ -56,19 +56,37 @@ without looking.
 
 ## Install
 
-You need [Quickshell](https://quickshell.org) on your `PATH`. With Nix,
-`nix develop` in a checkout gives you one. Then:
+With Nix (flakes):
 
 ```bash
-quickshell -p appring -d             # or: just run
+nix run github:mirql/appring                 # try it: starts it, hidden until opened
+nix profile install github:mirql/appring     # or install the `appring` command
 ```
 
-Bind a key to open it, and its release to commit. On Hyprland:
+On NixOS, add the flake as an input and the package to your system:
+
+```nix
+# flake.nix: inputs.appring.url = "github:mirql/appring";
+environment.systemPackages = [ inputs.appring.packages.${pkgs.system}.default ];
+```
+
+Then start it with your session and bind a key to open it, and the key's release to run
+the highlighted item. On Hyprland:
 
 ```ini
-bind  = SUPER, grave, exec, quickshell ipc -p /path/to/appring/appring call appring open ""
-bindr = SUPER, grave, exec, quickshell ipc -p /path/to/appring/appring call appring commit
+exec-once = appring run
+bind  = SUPER, grave, exec, appring open
+bindr = SUPER, grave, exec, appring commit
 ```
+
+`appring help` lists the commands: `run`, `open [NAME]`, `commit`, `cancel`,
+`toggle [NAME]`, `settings`, `stop`, `restart`. `open` and `settings` start it when it is
+not running. The package also installs a desktop entry ("appring", it opens the
+appearance window) and the icons.
+
+Without Nix: you need [Quickshell](https://quickshell.org) on your `PATH`; from a
+checkout, `quickshell -p appring -d` starts it and
+`quickshell ipc -p /path/to/appring/appring call appring open ""` opens it.
 
 ## Your menu
 

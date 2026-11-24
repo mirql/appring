@@ -32,9 +32,11 @@ To try the ring on your own Wayland desktop: `just run`, then `just open`.
 
 | path | what |
 |---|---|
+| `nix/` | The package: `package.nix` (the version), the `appring` command (`appring.sh`), the desktop entry |
 | `appring/` | The app, a Quickshell root: `shell.qml` (entry, settings), `Radial.qml` (behaviour), `Ring.qml` and `RingLayer.qml` (drawing), `Theme.qml`, `default.json` |
 | `tools/gallery.sh` | The off-screen test scene: every step, with screenshots |
 | `tools/check-radial.py` | What each step of the scene must show |
+| `tools/package-check.sh` | Checks a built package off-screen (`just test-package`) |
 | `tools/` (the rest) | Test helpers: a virtual pointer, a fake Hyprland IPC, a fake app, a process reaper |
 | `experiments/` | Earlier prototypes, not maintained, not in `just check` |
 | `assets/` | The logo set and app icons for Linux, Windows and macOS ([assets/README.md](assets/README.md)) |

@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=appring
+GenericName=Radial menu
+Comment=A radial menu for the desktop: hold a key, point, release to run. Opens its appearance settings.
+Exec=appring settings
+Icon=com.mirql.appring
+Terminal=false
+StartupNotify=false
+Categories=Utility;
+Keywords=radial;pie;menu;launcher;ring;

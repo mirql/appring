@@ -8,6 +8,12 @@
     systems = ["x86_64-linux" "aarch64-linux"];
     forAll = f: nixpkgs.lib.genAttrs systems (system: f nixpkgs.legacyPackages.${system});
   in {
+    # The app, the `appring` command, the desktop entry and the icons (nix/package.nix).
+    packages = forAll (pkgs: rec {
+      appring = pkgs.callPackage ./nix/package.nix {};
+      default = appring;
+    });
+
     # `nix develop`: everything the justfile needs, the off-screen tests included.
     devShells = forAll (pkgs: {
       default = pkgs.mkShell {
@@ -15,6 +21,7 @@
           pkgs.just
           pkgs.gitleaks
           pkgs.quickshell
+          pkgs.desktop-file-utils # desktop-file-validate: nix/com.mirql.appring.desktop
           # the off-screen tests (tools/gallery.sh)
           pkgs.sway
           pkgs.grim

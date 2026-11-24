@@ -45,6 +45,8 @@ To check this repo against the mirql conventions, use the `mirql-conventions` sk
   `RingLayer.qml` drawing, `Theme.qml`, `default.json`); `tools/` the off-screen tests
   (`gallery.sh` the scene, `check-radial.py` what each step must show); `experiments/`
   old prototypes, not maintained; `assets/` the logo set and app icons (generated as a set: don't hand-edit one file). CONTRIBUTING.md has the table.
+- Package: `nix/` (`package.nix` holds the version; `appring.sh` is the command). After a
+  change there: `just test-package` (needs Nix; it builds, then checks off-screen).
 - Test: `just check` (secret scan + `just test`). A behaviour change adds its step to
   `tools/gallery.sh` and its expectation to `tools/check-radial.py`.
 - Never run the ring on a live desktop session: no `just run`, `just open`,
