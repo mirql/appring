@@ -12,7 +12,7 @@ FloatingWindow {
     // the ring itself: its style rules are used for the preview
     required property var radial
 
-    title: "ring: appearance"
+    title: "appring: appearance"
     visible: false
     implicitWidth: 980
     implicitHeight: 680
