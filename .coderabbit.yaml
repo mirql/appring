@@ -1,0 +1,48 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+# CodeRabbit PR reviews. The rules below are CONTRIBUTING.md's and AGENTS.md's, per path.
+language: en-US
+tone_instructions: "Plain and short. appring runs commands from the user's menu file: first ask whether a change could run something other than what the menu says."
+
+reviews:
+  profile: chill
+  high_level_summary: true
+  # in the walkthrough comment, never in the PR description (squash commits must stay free of it)
+  high_level_summary_in_walkthrough: true
+  poem: false
+  review_status: true
+  collapse_walkthrough: true
+  auto_review:
+    enabled: true
+    drafts: false
+  path_filters:
+    - "!flake.lock"
+    - "!**/Cargo.lock"
+    - "!assets/**/*.svg"
+    - "!assets/**/*.png"
+    - "!assets/**/*.ico"
+    - "!assets/**/*.icns"
+  path_instructions:
+    - path: "ring/Radial.qml"
+      instructions: |
+        The behaviour: reading menu.json, picking by angle, committing. A `run` item
+        starts as an argv list (Quickshell.execDetached), never through a shell: flag
+        anything that joins arguments into a string or adds `sh -c`. A new config key
+        or setting needs its line in the README's "Your menu"; a new environment
+        variable or IPC call needs ring/shell.qml's header.
+    - path: "ring/**"
+      instructions: |
+        A behaviour change needs its step in tools/gallery.sh and its expectation in
+        tools/check-radial.py, and a CHANGELOG line under Unreleased.
+    - path: "tools/**"
+      instructions: |
+        The off-screen tests: a headless sway, a private D-Bus, fake apps. Nothing may
+        reach the live desktop session (no inherited WAYLAND_DISPLAY, DISPLAY,
+        HYPRLAND_INSTANCE_SIGNATURE or SWAYSOCK). Checks should assert exact runs
+        (arguments, and that nothing else started), not only that a step finished.
+    - path: "experiments/**"
+      instructions: "Old prototypes, not maintained and not in `just check`: review lightly."
+    - path: "**/*.md"
+      instructions: "If behaviour changes, the README and a CHANGELOG line under Unreleased change in the same PR. No host names, local paths or private names: the repo is public."
+
+chat:
+  auto_reply: true
