@@ -1,4 +1,4 @@
-# ring-app: a radial menu for the desktop. See README.md.
+# appring: a radial menu for the desktop. See README.md.
 # (mirql conventions 2026-11-19)
 
 default:

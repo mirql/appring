@@ -1,6 +1,6 @@
-# Contributing to ring
+# Contributing to appring
 
-Thanks for helping. Changes to ring are judged first by one question: does it make
+Thanks for helping. Changes to appring are judged first by one question: does it make
 picking an action faster and calmer, without making the ring harder to
 understand?
 

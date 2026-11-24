@@ -1,9 +1,4 @@
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="assets/logo/ring-dark.svg">
-    <img alt="ring." src="assets/logo/ring-light.svg" width="420">
-  </picture>
-</p>
+<p align="center"><img alt="appring. hold. point. release." src="assets/logo/appring-banner.svg" width="640"></p>
 
 <p align="center"><b>A radial menu for the desktop: hold a key, point, release to run.</b></p>
 
@@ -12,7 +7,7 @@
   <img alt="Platform: Linux (Wayland)" src="https://img.shields.io/badge/platform-Linux%20(Wayland)-lightgrey">
 </p>
 
-**ring** is a radial menu. Hold a key: a ring of buttons appears around the pointer. Point in a direction
+**appring** is a radial menu. Hold a key: a ring of buttons appears around the pointer. Point in a direction
 (the whole slice of the screen counts, never a small target), then release the
 key or click to run that item. Groups open as a smaller ring around their own
 button. Esc or a right click cancels; releasing in the centre does nothing. The
@@ -20,7 +15,7 @@ items are apps and commands from a JSON file you write. It is the kind of menu
 OPie made popular in World of Warcraft, for your desktop.
 
 ```bash
-git clone https://github.com/mirql/ring-app && cd ring-app
+git clone https://github.com/mirql/appring && cd appring
 nix develop                          # quickshell and the test tools
 just run                             # start it, hidden
 just open                            # show the default menu (bind this to a key)
@@ -28,7 +23,7 @@ just commit                          # run the highlighted item (bind this to th
 ```
 
 > [!NOTE]
-> ring is young (0.1, unreleased). It runs on Linux with a Wayland
+> appring is young (0.1, unreleased). It runs on Linux with a Wayland
 > compositor that has wlr-layer-shell (Hyprland, Sway, niri and others), built on
 > [Quickshell](https://quickshell.org). macOS and Windows are planned, not started.
 > There is no package yet: you run it from a checkout.
@@ -45,8 +40,8 @@ quickshell -p ring -d                # or: just run
 Bind a key to open it, and its release to commit. On Hyprland:
 
 ```ini
-bind  = SUPER, grave, exec, quickshell ipc -p /path/to/ring-app/ring call ring open ""
-bindr = SUPER, grave, exec, quickshell ipc -p /path/to/ring-app/ring call ring commit
+bind  = SUPER, grave, exec, quickshell ipc -p /path/to/appring/ring call ring open ""
+bindr = SUPER, grave, exec, quickshell ipc -p /path/to/appring/ring call ring commit
 ```
 
 ## Your menu

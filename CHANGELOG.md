@@ -2,7 +2,9 @@
 
 ## Unreleased
 
-- First version of ring: the radial menu on Quickshell (Linux, Wayland): angle-based
+- The name is now appring (repo `mirql/appring`, was `mirql/ring-app`), with a new
+  logo and app icons (icon name `com.mirql.appring`).
+- First version of appring: the radial menu on Quickshell (Linux, Wayland): angle-based
   selection over the whole screen, centred on the cursor, groups as satellite
   rings, a JSON menu re-read on every open, a style cascade, commit by key
   release, click or IPC.

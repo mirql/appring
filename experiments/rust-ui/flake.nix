@@ -1,5 +1,5 @@
 {
-  description = "ring-app experiments: toolchain for the Rust UI spikes (iced, cxx-qt, egui, egui-layershell) on Wayland";
+  description = "appring experiments: toolchain for the Rust UI spikes (iced, cxx-qt, egui, egui-layershell) on Wayland";
 
   inputs.nixpkgs.url = "nixpkgs";
 

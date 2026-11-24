@@ -1,5 +1,5 @@
 {
-  description = "ring-app: a radial menu for the desktop. Hold a key, point, release to run.";
+  description = "appring: a radial menu for the desktop. Hold a key, point, release to run.";
 
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 

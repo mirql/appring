@@ -1,4 +1,4 @@
-# Agent notes for ring (repo ring-app)
+# Agent notes for appring
 
 ## mirql rules for agents (mirql conventions 2026-11-19)
 
@@ -36,8 +36,10 @@ To check this repo against the mirql conventions, use the `mirql-conventions` sk
 
 ## This repo
 
-- What it is: ring, a radial menu for the desktop (hold a key, point, release to run),
-  on Quickshell, Linux/Wayland for now.
+- What it is: appring, a radial menu for the desktop (hold a key, point, release to run),
+  on Quickshell, Linux/Wayland for now. The code still uses the earlier name ring-app
+  (env `RING_APP_*`, `~/.config/ring-app/`, layer namespace `ring-app`), and the app's
+  folder and IPC target are `ring`: leave them as they are.
 - Layout: `ring/` the app (a Quickshell root: `Radial.qml` behaviour, `Ring.qml` and
   `RingLayer.qml` drawing, `Theme.qml`, `default.json`); `tools/` the off-screen tests
   (`gallery.sh` the scene, `check-radial.py` what each step must show); `experiments/`

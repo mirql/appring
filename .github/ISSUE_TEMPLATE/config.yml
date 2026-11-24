@@ -2,8 +2,8 @@
 blank_issues_enabled: false
 contact_links:
   - name: Ask a question
-    url: https://github.com/mirql/ring-app/discussions/categories/q-a
+    url: https://github.com/mirql/appring/discussions/categories/q-a
     about: How to set something up, whether it fits your case. Ideas go to Discussions > Ideas.
   - name: Report a security vulnerability
-    url: https://github.com/mirql/ring-app/security/advisories/new
+    url: https://github.com/mirql/appring/security/advisories/new
     about: Please report privately.

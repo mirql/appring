@@ -6,7 +6,7 @@ Please **do not open a public issue.** Report it privately through GitHub:
 **Security → Report a vulnerability** on this repository.
 
 Include what you can: what you ran, what happened, what should have happened, and your
-ring version and system. We will acknowledge the report, keep you updated, and credit
+appring version and system. We will acknowledge the report, keep you updated, and credit
 you in the advisory unless you prefer otherwise.
 
 ## In scope
