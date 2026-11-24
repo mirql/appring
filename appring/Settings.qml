@@ -72,6 +72,12 @@ Singleton {
     property alias iconColors: adapter.iconColors
     // Seconds for one turn of the centre ring; 0: it stands still.
     property alias spinSeconds: adapter.spinSeconds
+    // How groups open: "rotate" (shows one of its items and runs it; the wheel
+    // turns to the next), "jump" (the ring switches to its items), "satellite"
+    // (its items as a small ring around it). A group's own "open" wins.
+    property alias groups: adapter.groups
+    // Resting on a group shows its other items as a small ghost ring.
+    property alias ghost: adapter.ghost
     // A gap between two neighbouring slices where nothing is selected, as a
     // fraction of each slice (0 to 0.5).
     property alias sliceGap: adapter.sliceGap
@@ -112,6 +118,8 @@ Singleton {
             property bool iconColors: true
             property real spinSeconds: 4
             property real sliceGap: 0
+            property string groups: "rotate"
+            property bool ghost: true
             property int openMs: 250
             property int closeMs: 180
             property int flashMs: 300
@@ -138,6 +146,8 @@ Singleton {
         adapter.iconColors = true;
         adapter.spinSeconds = 4;
         adapter.sliceGap = 0;
+        adapter.groups = "rotate";
+        adapter.ghost = true;
         adapter.openMs = 250;
         adapter.closeMs = 180;
         adapter.flashMs = 300;

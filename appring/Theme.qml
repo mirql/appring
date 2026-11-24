@@ -89,6 +89,11 @@ Singleton {
     readonly property real chevronArm: 23 * s        // half its width
     readonly property real chevronRise: 0.45         // how far its arms drop, per px of arm
     readonly property real chevronWidth: 4.5 * s
+    // the ghost ring (a group's other items, as a preview)
+    readonly property int ghostDelay: parseInt(Settings.env("GHOST_MS") ?? "250")   // ms resting on a group before it shows
+    readonly property real ghostOpacity: 0.85
+    readonly property real ghostMinRadius: 30 * s
+
     // Pointing between two items selects nothing: this fraction of each
     // item's sector, half on each side, is the gap (the "Gap between
     // slices" setting; 0 by default).

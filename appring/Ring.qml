@@ -16,6 +16,10 @@ Item {
     property bool ringVisible: false
     // null, or Radial.qml's satellite frame (see `_openSatellite` there).
     property var satellite: null
+    // what each main button shows (a group's face), and the ghost ring (a
+    // group's other items, as a preview) or null: see Radial.qml
+    property var faces: []
+    property var ghost: null
     // 0, or the closing animation's progress (0 to 1), its length, and the
     // item that was run (flashes): see RingLayer
     property real closeT: 0
@@ -36,6 +40,7 @@ Item {
         anchors.fill: parent
         presetColours: root.presetMain
         spin: root.spin >= 0 ? root.spin : _ownSpin
+        faces: root.faces
         items: root.items
         styles: root.styles
         highlighted: root.highlighted
@@ -70,5 +75,28 @@ Item {
         flashIndex: root.flashSat
         brightIndex: -1
         dimOpacity: 1.0
+    }
+
+    // the ghost ring: a group's other items, faint and smaller, fading in
+    RingLayer {
+        id: ghostLayer
+        anchors.fill: parent
+        property var g: root.ghost
+        visible: opacity > 0.01
+        opacity: root.ghost ? Theme.ghostOpacity : 0
+        Behavior on opacity { NumberAnimation { duration: Theme.state } }
+        showCentre: false
+        items: g ? g.items : []
+        styles: g ? g.styles : []
+        slotCount: g ? g.slotCount : 0
+        slotOffset: 1
+        startAngle: g ? g.startAngle : 0
+        centreX: g ? g.centreX : 0
+        centreY: g ? g.centreY : 0
+        highlighted: -1
+        deadZone: true
+        ringVisible: root.ringVisible && !!g
+        closeT: root.closeT
+        closeMs: root.closeMs
     }
 }

@@ -59,6 +59,13 @@ ROOT = [
     item("Tools", "applications-utilities", "group"),
 ]
 
+# Tools' items after a jump into it: a ring of their own, main-ring sizes.
+TOOLS_JUMPED = [
+    item("Say hello", "dialog-information", "leaf"),
+    item("Calculator", "accessories-calculator", "leaf"),
+    item("System monitor", "utilities-system-monitor", "leaf"),
+]
+
 # The same, with the "labels": "all" setting.
 ROOT_ALL = [dict(i, style=dict(i["style"], caption="all")) for i in ROOT]
 
@@ -101,9 +108,15 @@ JUMP_B = (700, 1100)
 SENTINEL = (-1, -1)   # Radial.qml's _close(): off-screen, unmistakable
 
 
-def at(items, highlighted, dead_zone, cx=CX, cy=CY, visible=True, satellite=None):
+def at(items, highlighted, dead_zone, cx=CX, cy=CY, visible=True, satellite=None,
+       rotation=None, ghost=-1, depth=0):
+    # rotation: the face of each "rotate" group, {index: item index} (keys as
+    # JSON strings); ghost: the group whose ghost ring shows; depth: rings
+    # jumped into
     return {"visible": visible, "items": items, "highlighted": highlighted,
-            "deadZone": dead_zone, "centreX": cx, "centreY": cy, "satellite": satellite}
+            "deadZone": dead_zone, "centreX": cx, "centreY": cy,
+            "rotation": {str(k): v for k, v in (rotation or {}).items()},
+            "ghost": ghost, "depth": depth, "satellite": satellite}
 
 
 def closed():
@@ -169,6 +182,17 @@ EXPECT = {
     "named-menu": at(SUB1, -1, True),
     "named-missing": at([], -1, True),
     "closed-by-old-target": closed(),
+    # Nested rings, "rotate" (the default): Tools (index 3) shows its face.
+    "rotate-face": at(ROOT, 3, False, rotation={3: 0}),
+    "rotate-ghost": at(ROOT, 3, False, rotation={3: 0}, ghost=3),
+    "rotate-wheel": at(ROOT, 3, False, rotation={3: 1}, ghost=3),
+    "rotate-ran": closed(),
+    "rotate-remembered": at(ROOT, 3, False, rotation={3: 1}),
+    # the middle button: the ring switches to Tools' items (the pointer, to
+    # the left, points at the third of them, 240deg); Esc goes back, then closes
+    "jumped": at(TOOLS_JUMPED, 2, False, depth=1),
+    "jumped-back": at(ROOT, 3, False, rotation={3: 1}),
+    "nested-closed": closed(),
     # No APPRING_CONFIG_DIR: only the old ~/.config/ring-app -> read; both -> appring wins.
     "old-config-folder": at([item("Old", "folder", "leaf")], -1, True),
     "new-config-folder-wins": at([item("New", "folder", "leaf")], -1, True),
@@ -194,12 +218,14 @@ EXPECT = {
 # (click), then "Firefox" twice (click, then IPC). Nothing in default.json
 # changes anything on the machine: a gesture menu's default must be safe to
 # fire by accident.
-EXPECTED_RUNS = [
+EXPECTED_RUNS_HEAD = [
     ["notify-send", "appring", "Hello from the ring"],
     ["gnome-system-monitor"],
     ["firefox"],
     ["firefox"],
 ]
+# ...then the nested-ring part: Tools' face after one turn of the wheel.
+EXPECTED_RUNS = EXPECTED_RUNS_HEAD + [["gnome-calculator"]]
 
 
 def check_no_transitional_centre(quickshell_text):

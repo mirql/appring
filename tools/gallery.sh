@@ -132,6 +132,10 @@ export SWAYSOCK; SWAYSOCK=$(sed -n 's/^SWAYSOCK=//p' "$D/sway.env")
 # fallback), and a fake for every app default.json runs, first on PATH.
 mkdir -p "$D/ring-config" "$D/bin"
 export APPRING_CONFIG_DIR="$D/ring-config"
+# Groups open as satellites for most of the scene (the "groups" setting): the
+# satellite steps below test that mode; the nested-ring part near the end
+# switches to the default, "rotate".
+printf '{ "groups": "satellite" }\n' > "$APPRING_CONFIG_DIR/appearance.json"
 case "$APPRING_CONFIG_DIR" in "$D/"*) ;; *) echo "ABORT: APPRING_CONFIG_DIR is not the scene's own"; exit 1 ;; esac
 # Far past a synthetic pointer's move+click latency (~0.3-0.5s through
 # tools/pointer.py), so "a click opens a group" and "resting opens it" test
@@ -142,6 +146,9 @@ export APPRING_REST_MS=1500
 # in step with check-radial.py's GRACE_MS. Set under its old name on
 # purpose: the old RING_APP_* names must keep working.
 export RING_APP_CLOSE_MS=2000
+# And the ghost ring's delay, far past the pointer's latency, so a step right
+# after pointing at a group still sees no ghost, and a later one sees it.
+export APPRING_GHOST_MS=1500
 for app in firefox xdg-terminal-exec nautilus notify-send gnome-calculator gnome-system-monitor; do
   printf '#!/bin/sh\nexec python3 "%s" %s "$@"\n' "$G_HERE/tools/fake-app.py" "$app" > "$D/bin/$app"
   chmod +x "$D/bin/$app"
@@ -227,7 +234,7 @@ at $b1x $b1y;  dump boundary-after
 # exactly on a border (45deg) nothing is highlighted, and committing there
 # runs nothing. Then back to the defaults.
 ipc cancel
-printf '{ "labels": "all", "sliceGap": 0.33 }\n' > "$APPRING_CONFIG_DIR/appearance.json"
+printf '{ "labels": "all", "sliceGap": 0.33, "groups": "satellite" }\n' > "$APPRING_CONFIG_DIR/appearance.json"
 sleep 1
 at $cx $cy
 ipc open ""
@@ -236,7 +243,7 @@ dump labels-all
 at $((cx + 106)) $((cy - 106)); dump slice-gap
 ipc commit
 dump slice-gap-cancelled
-printf '{ "labels": "none", "sliceGap": 0 }\n' > "$APPRING_CONFIG_DIR/appearance.json"
+printf '{ "labels": "none", "sliceGap": 0, "groups": "satellite" }\n' > "$APPRING_CONFIG_DIR/appearance.json"
 sleep 1
 at $cx $cy
 ipc open ""
@@ -457,6 +464,40 @@ at $satL $satUp;     dump style-child-a
 shot radial-satellite-style "900,375 600x750"
 at $satLastX $satLastY;  dump style-child-b
 ipc cancel
+
+# Nested rings, the default ("groups": "rotate"): the Tools group shows one
+# of its items (its face) and runs it; resting on it shows the ghost ring;
+# the wheel turns to the next item; the face stays for the next open; the
+# middle button jumps into the group (the ring switches to its items) and Esc
+# goes back, then closes.
+printf '{ "groups": "rotate" }\n' > "$APPRING_CONFIG_DIR/appearance.json"
+sleep 1
+at $cx $cy
+ipc open ""
+at $cx $cy
+at $right $cy   # throwaway: the first move after an open
+at $left $cy;  quick_dump rotate-face
+sleep 1.6;     dump rotate-ghost
+shot nested-ghost "700,375 900x750"
+ptr scroll 1
+dump rotate-wheel
+ipc commit
+dump rotate-ran
+sleep 0.3
+at $cx $cy
+ipc open ""
+at $cx $cy
+at $right $cy   # throwaway
+at $left $cy;  dump rotate-remembered
+click middle
+dump jumped
+shot nested-jumped "900,375 600x750"
+key -k Escape
+dump jumped-back
+key -k Escape
+dump nested-closed
+printf '{ "groups": "satellite" }\n' > "$APPRING_CONFIG_DIR/appearance.json"
+sleep 1
 
 # The settings window: opens over IPC, draws its preview, closes again.
 ipc settings

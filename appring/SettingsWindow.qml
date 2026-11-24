@@ -164,6 +164,14 @@ FloatingWindow {
                         Amount { from: 0; to: 0.5; stepSize: 0.05; value: Settings.sliceGap; show: v => Math.round(v * 100) + "%"; onMoved: v => Settings.sliceGap = v }
                     }
                     Row {
+                        text: "Groups"
+                        Choice { model: ["rotate", "jump", "satellite"]; current: Settings.groups; onChose: v => Settings.groups = v }
+                    }
+                    Row {
+                        text: "Nested ring preview"
+                        Switch { checked: Settings.ghost; onToggled: Settings.ghost = checked }
+                    }
+                    Row {
                         text: "Instant pointer rotation"
                         Switch { checked: Settings.instantPointer; onToggled: Settings.instantPointer = checked }
                     }

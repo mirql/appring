@@ -26,6 +26,7 @@
 //   APPRING_RELEASE_KEY   Alt, Ctrl, Shift or Super (default): releasing it
 //                          inside the window commits
 //   APPRING_REST_MS       how long resting on a group opens it (default 250)
+//   APPRING_GHOST_MS       how long resting on a group shows its ghost ring (default 250)
 //   APPRING_CLOSE_MS      how long a satellite's close condition must hold
 //                          before it closes (default 150)
 //   APPRING_REDUCED_MOTION=1   no animations, whatever the settings say
