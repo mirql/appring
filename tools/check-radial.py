@@ -109,14 +109,14 @@ SENTINEL = (-1, -1)   # Radial.qml's _close(): off-screen, unmistakable
 
 
 def at(items, highlighted, dead_zone, cx=CX, cy=CY, visible=True, satellite=None,
-       rotation=None, ghost=-1, depth=0):
+       rotation=None, ghost=-1, depth=0, ghost_hl=-1):
     # rotation: the face of each "rotate" group, {index: item index} (keys as
     # JSON strings); ghost: the group whose ghost ring shows; depth: rings
     # jumped into
     return {"visible": visible, "items": items, "highlighted": highlighted,
             "deadZone": dead_zone, "centreX": cx, "centreY": cy,
             "rotation": {str(k): v for k, v in (rotation or {}).items()},
-            "ghost": ghost, "depth": depth, "satellite": satellite}
+            "ghost": ghost, "ghostHighlighted": ghost_hl, "depth": depth, "satellite": satellite}
 
 
 def closed():
@@ -186,13 +186,17 @@ EXPECT = {
     "rotate-face": at(ROOT, 3, False, rotation={3: 0}),
     "rotate-ghost": at(ROOT, 3, False, rotation={3: 0}, ghost=3),
     "rotate-wheel": at(ROOT, 3, False, rotation={3: 1}, ghost=3),
-    "rotate-ran": closed(),
-    "rotate-remembered": at(ROOT, 3, False, rotation={3: 1}),
+    # into the ghost ring: its first item after the turn, System monitor
+    "ghost-pick": at(ROOT, 3, False, rotation={3: 1}, ghost=3, ghost_hl=0),
+    "ghost-ran": closed(),
+    # what ran from the ghost ring is the face now
+    "rotate-remembered": at(ROOT, 3, False, rotation={3: 2}),
     # the middle button: the ring switches to Tools' items (the pointer, to
     # the left, points at the third of them, 240deg); Esc goes back, then closes
     "jumped": at(TOOLS_JUMPED, 2, False, depth=1),
-    "jumped-back": at(ROOT, 3, False, rotation={3: 1}),
+    "jumped-back": at(ROOT, 3, False, rotation={3: 2}),
     "nested-closed": closed(),
+    "face-ran": closed(),
     # No APPRING_CONFIG_DIR: only the old ~/.config/ring-app -> read; both -> appring wins.
     "old-config-folder": at([item("Old", "folder", "leaf")], -1, True),
     "new-config-folder-wins": at([item("New", "folder", "leaf")], -1, True),
@@ -224,8 +228,9 @@ EXPECTED_RUNS_HEAD = [
     ["firefox"],
     ["firefox"],
 ]
-# ...then the nested-ring part: Tools' face after one turn of the wheel.
-EXPECTED_RUNS = EXPECTED_RUNS_HEAD + [["gnome-calculator"]]
+# ...then the nested-ring part: System monitor picked in the ghost ring, then
+# run again as Tools' face.
+EXPECTED_RUNS = EXPECTED_RUNS_HEAD + [["gnome-system-monitor"], ["gnome-system-monitor"]]
 
 
 def check_no_transitional_centre(quickshell_text):

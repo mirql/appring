@@ -20,6 +20,8 @@ Item {
     // group's other items, as a preview) or null: see Radial.qml
     property var faces: []
     property var ghost: null
+    property int ghostHighlighted: -1   // the ghost ring's item under the pointer, or -1
+    property int flashGhost: -1         // closing: the ghost item that was run (flashes)
     // 0, or the closing animation's progress (0 to 1), its length, and the
     // item that was run (flashes): see RingLayer
     property real closeT: 0
@@ -83,7 +85,8 @@ Item {
         anchors.fill: parent
         property var g: root.ghost
         visible: opacity > 0.01
-        opacity: root.ghost ? Theme.ghostOpacity : 0
+        // a preview, a little faint; full when the pointer is in it
+        opacity: root.ghost ? (root.ghostHighlighted >= 0 ? 1 : Theme.ghostOpacity) : 0
         Behavior on opacity { NumberAnimation { duration: Theme.state } }
         showCentre: false
         items: g ? g.items : []
@@ -93,8 +96,9 @@ Item {
         startAngle: g ? g.startAngle : 0
         centreX: g ? g.centreX : 0
         centreY: g ? g.centreY : 0
-        highlighted: -1
-        deadZone: true
+        highlighted: root.ghostHighlighted
+        deadZone: root.ghostHighlighted < 0
+        flashIndex: root.flashGhost
         ringVisible: root.ringVisible && !!g
         closeT: root.closeT
         closeMs: root.closeMs

@@ -114,6 +114,9 @@ PanelWindow {
     // The group whose items show as a ghost ring (the preview), or -1.
     property int ghostIndex: -1
     property var ghost: null
+    // The ghost ring's item under the pointer (moved out past the group's
+    // button into the ghost ring), or -1: releasing runs it.
+    property int ghostHighlighted: -1
     property int highlightedIndex: -1
     property bool deadZone: true
     property real _pointerX: 0
@@ -203,6 +206,7 @@ PanelWindow {
         _stack = [];
         ghostIndex = -1;
         ghost = null;
+        ghostHighlighted = -1;
         ghostTimer.stop();
         highlightedIndex = -1;
         deadZone = true;
@@ -253,6 +257,18 @@ PanelWindow {
             }
             _run(satellite.items[satellite.highlighted]);
             _close({ sat: satellite.highlighted });
+            return;
+        }
+        if (ghost && ghostHighlighted >= 0 && ghostIndex >= 0) {
+            // an item of the ghost ring: run it, and it becomes the group's face
+            const g = items[ghostIndex], child = ghost.items[ghostHighlighted];
+            if (child.items) {
+                _jump(ghostIndex);
+                return;
+            }
+            _run(child);
+            _setFace(g, g.items.indexOf(child));
+            _close({ ghost: ghostHighlighted });
             return;
         }
         if (deadZone || !_current) {
@@ -358,6 +374,7 @@ PanelWindow {
         satellite = null;
         ghostIndex = -1;
         ghost = null;
+        ghostHighlighted = -1;
         ghostTimer.stop();
         satCloseTimer.stop();
         groupTimer.stop();
@@ -410,7 +427,9 @@ PanelWindow {
                 mainColours: liveRing.mainColours, satColours: liveRing.satColours,
                 ms: ms,
                 flashMain: flashing && ran.main !== undefined ? ran.main : -1,
-                flashSat: flashing && ran.sat !== undefined ? ran.sat : -1
+                flashSat: flashing && ran.sat !== undefined ? ran.sat : -1,
+                flashGhost: flashing && ran.ghost !== undefined ? ran.ghost : -1,
+                ghostHighlighted: ghostHighlighted
             };
             _open = false;
             fadeOut.duration = ms;
@@ -426,6 +445,7 @@ PanelWindow {
         satellite = null;
         ghostIndex = -1;
         ghost = null;
+        ghostHighlighted = -1;
         ghostTimer.stop();
         highlightedIndex = -1;
         deadZone = true;
@@ -650,6 +670,18 @@ PanelWindow {
             return;
         }
 
+        // Out past a group's button with its ghost ring showing: the pointer
+        // picks among the ghost ring's items; the group stays highlighted.
+        if (ghost && ghostIndex >= 0 && !mainDeadZone && _inGhostArea(ghostIndex, mdist, mainAngle)) {
+            deadZone = false;
+            _pointerAngle = mainAngle;
+            highlightedIndex = ghostIndex;
+            ghostHighlighted = _ghostItemAt(_pointerX, _pointerY);
+            _dumpState();
+            return;
+        }
+        ghostHighlighted = -1;
+
         // The main ring alone.
         deadZone = mainDeadZone;
         if (deadZone || items.length === 0) {
@@ -673,6 +705,15 @@ PanelWindow {
                 ghostTimer.restart();
         }
         const cur = items[mainIdx];
+        // pushed out past a "rotate" or "jump" group before its ghost ring
+        // showed: show it now, and let it take the pointer
+        if (cur && cur.items && cur.items.length > 1 && _groupMode(cur) !== "satellite" && Settings.ghost
+                && !ghost && _inGhostArea(mainIdx, mdist, mainAngle)) {
+            ghostTimer.stop();
+            _showGhost(mainIdx);
+            _recomputeHighlight();
+            return;
+        }
         const ringRadius = mainStyles[mainIdx]?.ringRadius ?? Theme.ringRadiusFor(items.length);
         if (cur && cur.items && _groupMode(cur) === "satellite" && mdist > _outerThreshold(ringRadius) && !_pastOuterHandled) {
             _pastOuterHandled = true;
@@ -688,6 +729,29 @@ PanelWindow {
             ghostIndex = -1;
             ghost = null;
         }
+        ghostHighlighted = -1;
+    }
+
+    // Is the pointer out past group `index`'s button (and still in its
+    // direction, with a margin)? Then the ghost ring is where it points.
+    function _inGhostArea(index, mdist, mainAngle) {
+        const r = mainStyles[index]?.ringRadius ?? Theme.ringRadiusFor(items.length);
+        const size = mainStyles[index]?.size ?? Theme.radialButtonSize;
+        let diff = Math.abs(mainAngle - index * 360 / items.length) % 360;
+        if (diff > 180)
+            diff = 360 - diff;
+        return mdist > r + size * 0.55 && diff <= 180 / items.length + Theme.ghostAngleMargin;
+    }
+    // the ghost ring's item in the pointer's direction from its centre: its
+    // first slot is the group's own button (the face, -1), then its items
+    function _ghostItemAt(x, y) {
+        const dx = x - ghost.centreX, dy = y - ghost.centreY;
+        const r = ghost.styles.length ? ghost.styles[0].ringRadius : 0;
+        if (Math.hypot(dx, dy) < r * 0.4)
+            return -1;
+        const a = ((Math.atan2(dx, -dy) * 180 / Math.PI - ghost.startAngle) % 360 + 720) % 360;
+        const slot = Math.round(a / (360 / ghost.slotCount)) % ghost.slotCount;
+        return slot === 0 ? -1 : slot - 1;
     }
 
     // ── config loading ────────────────────────────────────────────────
@@ -821,6 +885,7 @@ PanelWindow {
             centreY: Math.round(root.centreY),
             rotation: root._rotationDump(),
             ghost: root.ghostIndex,
+            ghostHighlighted: root.ghostHighlighted,
             depth: root._stack.length,
             satellite: root.satellite ? {
                 parentIndex: root.satellite.parentIndex,
@@ -935,6 +1000,8 @@ PanelWindow {
             satellite: root._fade ? root._fade.satellite : null
             faces: root._fade ? root._fade.faces : []
             ghost: root._fade ? root._fade.ghost : null
+            ghostHighlighted: root._fade ? root._fade.ghostHighlighted : -1
+            flashGhost: root._fade ? root._fade.flashGhost : -1
             closeT: root._fadeT
             closeMs: root._fade ? root._fade.ms : 0
             flashMain: root._fade ? root._fade.flashMain : -1
@@ -962,6 +1029,7 @@ PanelWindow {
             satellite: root.satellite
             faces: root.faces
             ghost: root.ghost
+            ghostHighlighted: root.ghostHighlighted
         }
 
         MouseArea {

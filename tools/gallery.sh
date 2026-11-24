@@ -465,7 +465,8 @@ shot radial-satellite-style "900,375 600x750"
 at $satLastX $satLastY;  dump style-child-b
 ipc cancel
 
-# Nested rings, the default ("groups": "rotate"): the Tools group shows one
+# Nested rings, the default ("groups": "rotate"), pointing at Tools' own
+# button ($satL: further out is "past" it): the Tools group shows one
 # of its items (its face) and runs it; resting on it shows the ghost ring;
 # the wheel turns to the next item; the face stays for the next open; the
 # middle button jumps into the group (the ring switches to its items) and Esc
@@ -476,19 +477,24 @@ at $cx $cy
 ipc open ""
 at $cx $cy
 at $right $cy   # throwaway: the first move after an open
-at $left $cy;  quick_dump rotate-face
+at $satL $cy;  quick_dump rotate-face
 sleep 1.6;     dump rotate-ghost
 shot nested-ghost "700,375 900x750"
 ptr scroll 1
 dump rotate-wheel
+# Out past Tools' button into its ghost ring (3 items: radius 34, centre
+# 147px left of the main centre; its first slot, pointing back, is Tools'
+# own button), at its second slot (210deg): System monitor, after the turn.
+at $((cx - 164)) $((cy + 29)); dump ghost-pick
+shot nested-ghost-pick "700,375 900x750"
 ipc commit
-dump rotate-ran
+dump ghost-ran
 sleep 0.3
 at $cx $cy
 ipc open ""
 at $cx $cy
 at $right $cy   # throwaway
-at $left $cy;  dump rotate-remembered
+at $satL $cy;  dump rotate-remembered
 click middle
 dump jumped
 shot nested-jumped "900,375 600x750"
@@ -496,6 +502,14 @@ key -k Escape
 dump jumped-back
 key -k Escape
 dump nested-closed
+# releasing on the group runs its face
+at $cx $cy
+ipc open ""
+at $cx $cy
+at $right $cy   # throwaway
+at $satL $cy
+ipc commit
+dump face-ran
 printf '{ "groups": "satellite" }\n' > "$APPRING_CONFIG_DIR/appearance.json"
 sleep 1
 

@@ -93,6 +93,7 @@ Singleton {
     readonly property int ghostDelay: parseInt(Settings.env("GHOST_MS") ?? "250")   // ms resting on a group before it shows
     readonly property real ghostOpacity: 0.85
     readonly property real ghostMinRadius: 30 * s
+    readonly property real ghostAngleMargin: 25   // degrees past the group's sector the ghost ring still has the pointer
 
     // Pointing between two items selects nothing: this fraction of each
     // item's sector, half on each side, is the gap (the "Gap between
