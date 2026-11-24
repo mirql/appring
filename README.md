@@ -95,6 +95,14 @@ bind  = SUPER, grave, exec, quickshell ipc -p /path/to/appring/appring call appr
 bindr = SUPER, grave, exec, quickshell ipc -p /path/to/appring/appring call appring commit
 ```
 
+appring draws its own opening and closing; turn off Hyprland's layer animation for it,
+or Hyprland shrinks and fades its full-screen layer on top, which looks like the ring
+sliding away:
+
+```ini
+layerrule = noanim, ^(appring)$
+```
+
 ## Your menu
 
 The ring reads `~/.config/appring/menu.json` each time it opens
