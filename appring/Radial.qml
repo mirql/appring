@@ -224,7 +224,7 @@ PanelWindow {
 
     function toggle(name) {
         if (_open)
-            cancel();
+            _close();   // closes, from any depth
         else
             open(name);
     }
@@ -810,6 +810,10 @@ PanelWindow {
 
     function _applyConfig(parsed) {
         _globalStyleRaw = parsed.styleRaw;
+        // a menu read while open (the read is not instant) starts at its top:
+        // no way back into the old one, no old ghost ring
+        _stack = [];
+        _hideGhost();
         items = parsed.items;
         mainStyles = items.map(it => _effectiveStyle(it, false, null, items.length));
         _resetFaces();
@@ -937,7 +941,7 @@ PanelWindow {
         target: Quickshell
         function onScreensChanged() {
             if (root._open && !root._realScreens().includes(root.screen))
-                root.cancel();
+                root._close();   // closes, from any depth
         }
     }
 
