@@ -60,21 +60,21 @@ You need [Quickshell](https://quickshell.org) on your `PATH`. With Nix,
 `nix develop` in a checkout gives you one. Then:
 
 ```bash
-quickshell -p ring -d                # or: just run
+quickshell -p appring -d             # or: just run
 ```
 
 Bind a key to open it, and its release to commit. On Hyprland:
 
 ```ini
-bind  = SUPER, grave, exec, quickshell ipc -p /path/to/appring/ring call ring open ""
-bindr = SUPER, grave, exec, quickshell ipc -p /path/to/appring/ring call ring commit
+bind  = SUPER, grave, exec, quickshell ipc -p /path/to/appring/appring call appring open ""
+bindr = SUPER, grave, exec, quickshell ipc -p /path/to/appring/appring call appring commit
 ```
 
 ## Your menu
 
-The ring reads `~/.config/ring-app/menu.json` each time it opens
-(`$XDG_CONFIG_HOME/ring-app`, or `RING_APP_CONFIG_DIR`). Without one it shows
-[`ring/default.json`](ring/default.json). `open "tools"` reads `menu-tools.json`
+The ring reads `~/.config/appring/menu.json` each time it opens
+(`$XDG_CONFIG_HOME/appring`, or `APPRING_CONFIG_DIR`). Without one it shows
+[`appring/default.json`](appring/default.json). `open "tools"` reads `menu-tools.json`
 from the same folder.
 
 ```json
@@ -103,9 +103,9 @@ from the same folder.
 
 ## Appearance
 
-`quickshell ipc -p ring call ring settings` opens the appearance window (or add it to
+`quickshell ipc -p appring call appring settings` opens the appearance window (or add it to
 your menu as an item). It shows a live preview, and saves to
-`~/.config/ring-app/appearance.json` at once:
+`~/.config/appring/appearance.json` at once:
 
 | Setting | Default |
 |---|---|
@@ -125,9 +125,14 @@ your menu as an item). It shows a live preview, and saves to
 | Chevron speed (how fast it swings round) | 1.0x |
 | Glow strength; flash pop (how much the button grows) | 0.75; +30% |
 
-Settings by environment: `RING_APP_RELEASE_KEY` (`Super`, `Alt`, `Ctrl`, `Shift`),
-`RING_APP_REST_MS` (resting on a group opens it, default 250),
-`RING_APP_REDUCED_MOTION=1`. More in [`ring/shell.qml`](ring/shell.qml).
+Settings by environment: `APPRING_RELEASE_KEY` (`Super`, `Alt`, `Ctrl`, `Shift`),
+`APPRING_REST_MS` (resting on a group opens it, default 250),
+`APPRING_REDUCED_MOTION=1`. More in [`appring/shell.qml`](appring/shell.qml).
+
+Coming from ring-app, appring's earlier name? Nothing breaks: the `RING_APP_*` names, the
+IPC target `ring` and the folder `~/.config/ring-app/` (while there is no
+`~/.config/appring/`) still work. To move: `mv ~/.config/ring-app ~/.config/appring`, and
+point your key binds at `appring/` with `call appring`.
 
 ## Limits
 

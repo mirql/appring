@@ -39,7 +39,7 @@ fn now_nanos() -> u64 {
 
 fn socket_path() -> PathBuf {
     let dir = std::env::var("XDG_RUNTIME_DIR").unwrap_or_else(|_| "/tmp".to_string());
-    PathBuf::from(dir).join("ring-app-spike-iced.sock")
+    PathBuf::from(dir).join("appring-spike-iced.sock")
 }
 
 fn hyprctl_bin() -> String {
@@ -243,7 +243,7 @@ struct Ring {
 }
 
 fn namespace() -> String {
-    "ring-app-spike-iced".to_string()
+    "appring-spike-iced".to_string()
 }
 
 fn hide_tasks() -> Task<Message> {

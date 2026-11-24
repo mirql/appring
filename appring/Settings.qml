@@ -1,23 +1,54 @@
 pragma Singleton
 
-// The appearance settings: appearance.json next to the menus (RING_APP_CONFIG_DIR,
-// default $XDG_CONFIG_HOME/ring-app). The settings window writes it; the ring
+// The appearance settings: appearance.json next to the menus (APPRING_CONFIG_DIR,
+// default $XDG_CONFIG_HOME/appring). The settings window writes it; the ring
 // re-reads it when it changes, so changes show at once. A missing file means
 // the defaults below; it is written the first time a setting changes.
 
 import QtQuick
+import Qt.labs.folderlistmodel
 import Quickshell
 import Quickshell.Io
 
 Singleton {
     id: root
 
+    // An environment setting: APPRING_<name>, or its old name RING_APP_<name>
+    // (the app was called ring-app before; the old names still work).
+    function env(name) {
+        return Quickshell.env("APPRING_" + name) ?? Quickshell.env("RING_APP_" + name) ?? null;
+    }
+
     readonly property string _home: Quickshell.env("HOME") ?? ""
     readonly property string _xdgConfig: Quickshell.env("XDG_CONFIG_HOME") ?? ""
-    readonly property string _configDirOverride: Quickshell.env("RING_APP_CONFIG_DIR") ?? ""
+    readonly property string _configBase: _xdgConfig !== "" ? _xdgConfig : _home + "/.config"
+    readonly property string _configDirOverride: env("CONFIG_DIR") ?? ""
+    // The old folder, ~/.config/ring-app, is still read while there is no
+    // ~/.config/appring (with a hint, once, to move it).
+    readonly property bool _legacyDir: {
+        if (_configFolders.status !== FolderListModel.Ready)
+            return false;
+        let hasNew = false, hasOld = false;
+        for (let i = 0; i < _configFolders.count; i++) {
+            const n = _configFolders.get(i, "fileName");
+            hasNew = hasNew || n === "appring";
+            hasOld = hasOld || n === "ring-app";
+        }
+        return hasOld && !hasNew;
+    }
+    on_LegacyDirChanged: if (_legacyDir && _configDirOverride === "")
+        console.warn("appring: reading the old config folder " + _configBase + "/ring-app; move it to " + _configBase + "/appring");
+    FolderListModel {
+        id: _configFolders
+        folder: "file://" + root._configBase
+        showDirs: true
+        showFiles: false
+        showHidden: true
+        nameFilters: ["appring", "ring-app"]
+    }
     // where menu.json, menu-<name>.json and appearance.json live
     readonly property string configDir: _configDirOverride !== "" ? _configDirOverride
-        : ((_xdgConfig !== "" ? _xdgConfig : _home + "/.config") + "/ring-app")
+        : _configBase + (_legacyDir ? "/ring-app" : "/appring")
 
     // Ring scale: every size of the ring and the centre, 0.5 to 2.
     property alias scale: adapter.scale

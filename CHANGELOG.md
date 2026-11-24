@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- The code names follow the app's name: the folder `appring/` (was `ring/`), the config
+  folder `~/.config/appring/`, the environment `APPRING_*`, the IPC target `appring`, the
+  layer namespace `appring`. The old ones still work: `RING_APP_*`, the IPC target
+  `ring`, and `~/.config/ring-app/` while there is no `~/.config/appring/` (the ring says
+  once that it can be moved).
 - A new look after OPie: square icon buttons with a thin border in each slice's own
   colour, taken from its icon; no backdrop and no captions by default; a centre ring
   in two halves that spins, lit in the focused slice's colour with a soft glow

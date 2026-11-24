@@ -24,8 +24,8 @@ Singleton {
     readonly property int fontSmall: 11
 
     // A state change moves, at rest it is calm. No animation with the
-    // "Animate transitions" setting off, or RING_APP_REDUCED_MOTION=1.
-    readonly property bool reducedMotion: Quickshell.env("RING_APP_REDUCED_MOTION") === "1" || !Settings.animate
+    // "Animate transitions" setting off, or APPRING_REDUCED_MOTION=1.
+    readonly property bool reducedMotion: Settings.env("REDUCED_MOTION") === "1" || !Settings.animate
     // (the speeds are settings: see Settings.qml)
     function _ms(v) { return reducedMotion ? 0 : Math.max(0, Math.round(v)); }
     readonly property int fast: _ms(Settings.growMs)      // the highlighted button growing

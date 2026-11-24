@@ -3,7 +3,7 @@
   { "label": "Terminal", "icon": "utilities-terminal", "run": ["xdg-terminal-exec"] },
   { "label": "Files", "icon": "system-file-manager", "run": ["nautilus"] },
   { "label": "Tools", "icon": "applications-utilities", "items": [
-    { "label": "Say hello", "icon": "dialog-information", "run": ["notify-send", "ring-app", "Hello from the ring"] },
+    { "label": "Say hello", "icon": "dialog-information", "run": ["notify-send", "appring", "Hello from the ring"] },
     { "label": "Calculator", "icon": "accessories-calculator", "run": ["gnome-calculator"] },
     { "label": "System monitor", "icon": "utilities-system-monitor", "run": ["gnome-system-monitor"] }
   ] }

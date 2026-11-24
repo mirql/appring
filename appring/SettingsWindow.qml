@@ -1,6 +1,6 @@
 // The appearance settings window: the settings in Settings.qml, saved to
 // appearance.json at once, with a live preview of a ring next to them.
-// Opened with `quickshell ipc -p ring call ring settings` (again: closes).
+// Opened with `quickshell ipc -p appring call appring settings` (again: closes).
 
 import QtQuick
 import QtQuick.Controls.Basic

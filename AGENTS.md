@@ -37,19 +37,20 @@ To check this repo against the mirql conventions, use the `mirql-conventions` sk
 ## This repo
 
 - What it is: appring, a radial menu for the desktop (hold a key, point, release to run),
-  on Quickshell, Linux/Wayland for now. The code still uses the earlier name ring-app
-  (env `RING_APP_*`, `~/.config/ring-app/`, layer namespace `ring-app`), and the app's
-  folder and IPC target are `ring`: leave them as they are.
-- Layout: `ring/` the app (a Quickshell root: `Radial.qml` behaviour, `Ring.qml` and
+  on Quickshell, Linux/Wayland for now. It was called ring-app before: the old names
+  still work for users (env `RING_APP_*`, the IPC target `ring`, the folder
+  `~/.config/ring-app/` while there is no `~/.config/appring/`). Keep them working, and
+  keep the test steps that check them.
+- Layout: `appring/` the app (a Quickshell root: `Radial.qml` behaviour, `Ring.qml` and
   `RingLayer.qml` drawing, `Theme.qml`, `default.json`); `tools/` the off-screen tests
   (`gallery.sh` the scene, `check-radial.py` what each step must show); `experiments/`
   old prototypes, not maintained; `assets/` the logo set and app icons (generated as a set: don't hand-edit one file). CONTRIBUTING.md has the table.
 - Test: `just check` (secret scan + `just test`). A behaviour change adds its step to
   `tools/gallery.sh` and its expectation to `tools/check-radial.py`.
 - Never run the ring on a live desktop session: no `just run`, `just open`,
-  `quickshell -p ring` outside `just test`. The tests use a headless sway only.
+  `quickshell -p appring` outside `just test`. The tests use a headless sway only.
 - Docs to update with a change: the README's "Your menu" for a config key or
-  setting, `ring/shell.qml`'s header for an environment variable or IPC call,
+  setting, `appring/shell.qml`'s header for an environment variable or IPC call,
   CHANGELOG.md for anything a user notices.
 - The repo has no secrets. External here: pushing, issues, PRs, releases.
 

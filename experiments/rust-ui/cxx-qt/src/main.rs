@@ -35,7 +35,7 @@ pub fn now_nanos() -> u64 {
 
 fn socket_path() -> PathBuf {
     let dir = std::env::var("XDG_RUNTIME_DIR").unwrap_or_else(|_| "/tmp".to_string());
-    PathBuf::from(dir).join("ring-app-spike-cxxqt.sock")
+    PathBuf::from(dir).join("appring-spike-cxxqt.sock")
 }
 
 pub struct Shared {

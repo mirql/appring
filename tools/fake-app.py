@@ -2,7 +2,7 @@
 """A stand-in for every app a test menu runs: logs its argv, runs nothing.
 
 tools/gallery.sh puts one small wrapper per command name from
-ring/default.json first on PATH; each wrapper calls
+appring/default.json first on PATH; each wrapper calls
 
     fake-app.py NAME ARGS...
 

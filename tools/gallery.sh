@@ -11,7 +11,7 @@
 # it got is not inside its own runtime dir. Every app a commit runs is a
 # fake (tools/fake-app.py) that only logs its argv.
 #
-#   nix develop -c ./tools/gallery.sh           # -> /tmp/ring-app-gallery/*.png
+#   nix develop -c ./tools/gallery.sh           # -> /tmp/appring-gallery/*.png
 #   GALLERY_OUT=/tmp/g2 ./tools/gallery.sh      # a parallel run needs its own dir
 #
 # Needs, from `nix develop`: quickshell, sway, grim, wtype, python3 with
@@ -29,7 +29,7 @@
 set -euo pipefail
 
 HERE="$(cd "$(dirname "$0")/.." && pwd)"
-OUT="${GALLERY_OUT:-/tmp/ring-app-gallery}"
+OUT="${GALLERY_OUT:-/tmp/appring-gallery}"
 
 # Bound the whole run and reap every helper, even on an interruption.
 if [ "${1:-}" != --scene ] && [ "${1:-}" != --supervised ]; then
@@ -131,15 +131,16 @@ export SWAYSOCK; SWAYSOCK=$(sed -n 's/^SWAYSOCK=//p' "$D/sway.env")
 # Its own config directory, empty at first (no menu.json: the default.json
 # fallback), and a fake for every app default.json runs, first on PATH.
 mkdir -p "$D/ring-config" "$D/bin"
-export RING_APP_CONFIG_DIR="$D/ring-config"
-case "$RING_APP_CONFIG_DIR" in "$D/"*) ;; *) echo "ABORT: RING_APP_CONFIG_DIR is not the scene's own"; exit 1 ;; esac
+export APPRING_CONFIG_DIR="$D/ring-config"
+case "$APPRING_CONFIG_DIR" in "$D/"*) ;; *) echo "ABORT: APPRING_CONFIG_DIR is not the scene's own"; exit 1 ;; esac
 # Far past a synthetic pointer's move+click latency (~0.3-0.5s through
 # tools/pointer.py), so "a click opens a group" and "resting opens it" test
 # two different triggers, not a race the 250ms default would always win.
-export RING_APP_REST_MS=1500
+export APPRING_REST_MS=1500
 # The same for the satellite's close grace: a checkpoint right after a
 # closing move proves it is still open, a later one that it closed. Kept
-# in step with check-radial.py's GRACE_MS.
+# in step with check-radial.py's GRACE_MS. Set under its old name on
+# purpose: the old RING_APP_* names must keep working.
 export RING_APP_CLOSE_MS=2000
 for app in firefox xdg-terminal-exec nautilus notify-send gnome-calculator gnome-system-monitor; do
   printf '#!/bin/sh\nexec python3 "%s" %s "$@"\n' "$G_HERE/tools/fake-app.py" "$app" > "$D/bin/$app"
@@ -151,8 +152,8 @@ export FAKE_APP_LOG="$D/radial-runs.log"
 : > "$D/radial.log"
 
 # ── the ring ──────────────────────────────────────────────────────────────
-ROOT="$G_HERE/ring"
-HYPRLAND_INSTANCE_SIGNATURE="$SIG" RING_APP_DUMP=1 QT_QPA_PLATFORM=wayland QT_QUICK_BACKEND=software \
+ROOT="$G_HERE/appring"
+HYPRLAND_INSTANCE_SIGNATURE="$SIG" APPRING_DUMP=1 QT_QPA_PLATFORM=wayland QT_QUICK_BACKEND=software \
   quickshell -p "$ROOT" > "$D/quickshell.log" 2>&1 &
 pids+=($!)
 sleep 4
@@ -169,10 +170,10 @@ at() { ptr move "$1" "$2"; sleep 0.2; }
 click() { ptr click "$1"; }
 
 # A fresh `quickshell ipc` call per step. dump() appends the last state line
-# the ring logged (RING_APP_DUMP=1) under a step name; check-radial.py holds
+# the ring logged (APPRING_DUMP=1) under a step name; check-radial.py holds
 # what each step must show.
-ipc() { quickshell ipc -p "$ROOT" call ring "$@" >/dev/null 2>&1; sleep 0.3; }
-last_state() { grep -o 'ring-app state .*' "$D/quickshell.log" | tail -n 1 | sed 's/^ring-app state //' || echo; }
+ipc() { quickshell ipc -p "$ROOT" call appring "$@" >/dev/null 2>&1; sleep 0.3; }
+last_state() { grep -o 'appring state .*' "$D/quickshell.log" | tail -n 1 | sed 's/^appring state //' || echo; }
 dump() { sleep 0.6; { printf '%s ' "$1"; last_state; } >> "$D/radial.log"; }
 # For checkpoints that must land inside the (raised) close grace: a much
 # shorter, but still real, settle.
@@ -225,7 +226,7 @@ at $b1x $b1y;  dump boundary-after
 # exactly on a border (45deg) nothing is highlighted, and committing there
 # runs nothing. Then back to the defaults.
 ipc cancel
-printf '{ "labels": "all", "sliceGap": 0.33 }\n' > "$RING_APP_CONFIG_DIR/appearance.json"
+printf '{ "labels": "all", "sliceGap": 0.33 }\n' > "$APPRING_CONFIG_DIR/appearance.json"
 sleep 1
 at $cx $cy
 ipc open ""
@@ -234,7 +235,7 @@ dump labels-all
 at $((cx + 106)) $((cy - 106)); dump slice-gap
 ipc commit
 dump slice-gap-cancelled
-printf '{ "labels": "none", "sliceGap": 0 }\n' > "$RING_APP_CONFIG_DIR/appearance.json"
+printf '{ "labels": "none", "sliceGap": 0 }\n' > "$APPRING_CONFIG_DIR/appearance.json"
 sleep 1
 at $cx $cy
 ipc open ""
@@ -318,7 +319,7 @@ ipc commit
 dump satellite-leaf-committed-ipc
 sleep 0.3
 
-# Third way in: resting on the group past RING_APP_REST_MS, with neither a
+# Third way in: resting on the group past APPRING_REST_MS, with neither a
 # click nor crossing the outer radius. A click commits the highlighted item.
 ipc open ""
 at $cx $cy
@@ -367,7 +368,7 @@ sleep 0.3
 
 # The config is re-read on every open: a file written now is what the next
 # open shows.
-cat > "$RING_APP_CONFIG_DIR/menu.json" <<'MENUJSON'
+cat > "$APPRING_CONFIG_DIR/menu.json" <<'MENUJSON'
 [{ "label": "Solo", "icon": "applications-system", "run": ["echo", "solo item"] }]
 MENUJSON
 at $cx $cy
@@ -377,7 +378,7 @@ dump reread-custom
 
 # Named menus: open("sub") reads menu-sub.json; open("missing") with no file
 # is an empty ring, never default.json and never a crash.
-cat > "$RING_APP_CONFIG_DIR/menu-sub.json" <<'MENUJSON'
+cat > "$APPRING_CONFIG_DIR/menu-sub.json" <<'MENUJSON'
 [{ "label": "Sub1", "icon": "applications-utilities", "run": ["true"] }]
 MENUJSON
 at $cx $cy
@@ -388,12 +389,14 @@ at $cx $cy
 ipc open "missing"
 at $cx $cy
 dump named-missing
-ipc cancel
+# through the old IPC target "ring" (from the old name): key binds keep working
+quickshell ipc -p "$ROOT" call ring cancel >/dev/null 2>&1; sleep 0.3
+dump closed-by-old-target
 
 # The centre is exactly the cursor, never clamped: opened at a corner, part
 # of the ring is off-screen, and a direction reachable from there still
 # selects. Back to default.json first (four items, to have an angle at all).
-rm -f "$RING_APP_CONFIG_DIR/menu.json"
+rm -f "$APPRING_CONFIG_DIR/menu.json"
 at 20 15
 ipc open ""
 at 20 15
@@ -422,7 +425,7 @@ ipc cancel
 # their own, and one unknown key ("notAKey", twice) giving exactly one
 # warning. Same 4-item geometry as default.json, so the satellite points
 # above still apply.
-cat > "$RING_APP_CONFIG_DIR/menu-style.json" <<'MENUJSON'
+cat > "$APPRING_CONFIG_DIR/menu-style.json" <<'MENUJSON'
 {
   "style": { "glowColor": "warn", "cornerRadius": 0.3, "notAKey": 1 },
   "items": [

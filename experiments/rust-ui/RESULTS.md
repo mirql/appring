@@ -242,7 +242,7 @@ nothing is listening yet.
 cd experiments/rust-ui
 nix develop -c bash tools/gallery.sh            # every toolkit that builds
 nix develop -c bash tools/gallery.sh egui       # one at a time
-cat /tmp/ring-app-experiments-gallery/summary.txt
+cat /tmp/appring-experiments-gallery/summary.txt
 ```
 
 Never touches your desktop: a private headless sway
@@ -381,7 +381,7 @@ path left untested by design.
 
 Closer than either first-round egui/cxx-qt screenshot, on the things that
 were in scope: six rounded-square buttons (not circles, as the Quickshell
-ring's `ring/RingLayer.qml` `radiusFor()`), a caption
+ring's `RingLayer.qml` `radiusFor()`), a caption
 under *every* button always shown (not just the highlighted one, the
 first egui prototype's gap), a centre disc with a separate small arrow
 (not drawn here pointing anywhere useful in the committed screenshot,
@@ -390,7 +390,7 @@ itself mirrors `RingLayer.qml`'s "separate shape, hidden in the dead
 zone" rule), and a soft dark halo sized only to the ring's own footprint,
 never full-screen.
 
-Two honest gaps against the Quickshell ring (`ring/`),
+Two honest gaps against the Quickshell ring (appring),
 neither hidden:
 
 - **The halo is not a real radial gradient.** `RingLayer.qml` uses

@@ -43,7 +43,7 @@ fn now_nanos() -> u64 {
 
 fn socket_path() -> PathBuf {
     let dir = std::env::var("XDG_RUNTIME_DIR").unwrap_or_else(|_| "/tmp".to_string());
-    PathBuf::from(dir).join("ring-app-spike-egui.sock")
+    PathBuf::from(dir).join("appring-spike-egui.sock")
 }
 
 fn hyprctl_bin() -> String {
@@ -233,7 +233,7 @@ fn daemon_run() {
     };
 
     eframe::run_native(
-        "ring-app-spike-egui",
+        "appring-spike-egui",
         options,
         Box::new(move |cc| {
             *shared.ctx.lock().unwrap() = Some(cc.egui_ctx.clone());

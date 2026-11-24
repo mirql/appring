@@ -111,7 +111,7 @@ fn socket_path() -> PathBuf {
     // "cxxqt") so tools/gallery.sh's `sock_suffix_for()` needs no new
     // special case for this one: its default branch already echoes the
     // toolkit name ("egui-layershell") verbatim.
-    PathBuf::from(dir).join("ring-app-spike-egui-layershell.sock")
+    PathBuf::from(dir).join("appring-spike-egui-layershell.sock")
 }
 
 fn hyprctl_bin() -> String {
@@ -388,7 +388,7 @@ impl State {
             &self.qh,
             wl_surface,
             Layer::Overlay,
-            Some("ring-app-spike-egui-layershell"),
+            Some("appring-spike-egui-layershell"),
             None,
         );
         // Real pixel positioning, not output-centring: anchoring two
@@ -692,7 +692,7 @@ fn daemon_run() {
 }
 
 /// The ring itself: six rounded-square buttons on a circle, captions
-/// always shown beneath each (the Quickshell ring.s look, `ring/
+/// always shown beneath each (the Quickshell ring's look, `appring/
 /// RingLayer.qml`), the one nearest the pointer's angle scaled up with a
 /// soft glow, a centre disc with a small arrow pointing at the pointer's
 /// direction (hidden inside a small dead zone around the centre), and a

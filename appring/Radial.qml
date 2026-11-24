@@ -26,15 +26,15 @@
 // closes it. Depth 2 is the limit: a satellite's items do not open further.
 //
 // Commit: IPC `commit()` (for a key-release bind), releasing the opening key
-// inside the window (RING_APP_RELEASE_KEY, Super by default), or a left
+// inside the window (APPRING_RELEASE_KEY, Super by default), or a left
 // click. Cancel: IPC `cancel()`, Esc, or a right click, always closing
 // everything. Committing a leaf runs its `run` argv directly (no shell);
 // committing a group opens its satellite; committing in the satellite's
 // centre goes back to the main ring.
 //
 // Config: a JSON file, re-read on every open. `open("")` reads menu.json,
-// `open("tools")` reads menu-tools.json, both in RING_APP_CONFIG_DIR
-// (default $XDG_CONFIG_HOME/ring-app). The default menu falls back to this
+// `open("tools")` reads menu-tools.json, both in APPRING_CONFIG_DIR
+// (default $XDG_CONFIG_HOME/appring). The default menu falls back to this
 // folder's default.json; a named menu with no file is an empty ring. The
 // file is either an array of items or `{"style": {...}, "items": [...]}`.
 //
@@ -43,7 +43,7 @@
 // their own (`_effectiveStyle`). Unknown style keys log one warning each
 // per config load, never a crash.
 //
-// RING_APP_DUMP=1: one `ring-app state <json>` line per change to what is
+// APPRING_DUMP=1: one `appring state <json>` line per change to what is
 // shown, highlighted, the dead zone or the satellite, read by the tests
 // (tools/check-radial.py).
 
@@ -66,14 +66,14 @@ PanelWindow {
         left: true
         right: true
     }
-    WlrLayershell.namespace: "ring-app"
+    WlrLayershell.namespace: "appring"
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.keyboardFocus: visible ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
 
     // ── settings ──────────────────────────────────────────────────────
     readonly property string _configDir: Settings.configDir
     readonly property string _defaultConfigPath: Quickshell.shellDir + "/default.json"
-    readonly property bool _dump: Quickshell.env("RING_APP_DUMP") === "1"
+    readonly property bool _dump: Settings.env("DUMP") === "1"
 
     function _pathFor(name) {
         return _configDir + "/" + (name ? ("menu-" + name + ".json") : "menu.json");
@@ -81,16 +81,16 @@ PanelWindow {
 
     // The key whose release inside the window commits. The compositor's own
     // bind is not visible from here, so it is a setting.
-    readonly property string _releaseKey: Quickshell.env("RING_APP_RELEASE_KEY") ?? "Super"
+    readonly property string _releaseKey: Settings.env("RELEASE_KEY") ?? "Super"
 
     // How long resting on a group opens it. The tests raise it far above a
     // synthetic pointer's latency, so "a click opened it" and "it rested
     // open" are told apart.
-    readonly property int _restMs: parseInt(Quickshell.env("RING_APP_REST_MS") ?? "250")
+    readonly property int _restMs: parseInt(Settings.env("REST_MS") ?? "250")
 
     // How long a satellite's close condition must hold before it closes.
     // The tests raise it to prove the delay is real.
-    readonly property int _satCloseGraceMs: parseInt(Quickshell.env("RING_APP_CLOSE_MS") ?? "150")
+    readonly property int _satCloseGraceMs: parseInt(Settings.env("CLOSE_MS") ?? "150")
 
     // ── state ─────────────────────────────────────────────────────────
     property string menuName: ""
@@ -121,7 +121,7 @@ PanelWindow {
     readonly property var _styleKeys: ["shape", "cornerRadius", "size", "glowColor", "glowSize", "ringRadius", "captionSize", "caption", "backdrop"]
     property var _unknownWarned: null   // a Set, reset on every config parse
 
-    // `ipc call ring settings`: shell.qml opens or closes the settings window.
+    // `ipc call appring settings`: shell.qml opens or closes the settings window.
     signal settingsRequested()
 
     readonly property var _current: (highlightedIndex >= 0 && highlightedIndex < items.length) ? items[highlightedIndex] : null
@@ -379,7 +379,7 @@ PanelWindow {
         for (const k of Object.keys(obj)) {
             if (_styleKeys.indexOf(k) === -1 && !_unknownWarned.has(k)) {
                 _unknownWarned.add(k);
-                console.warn("ring-app: unknown style key \"" + k + "\" (" + context + "), ignored");
+                console.warn("appring: unknown style key \"" + k + "\" (" + context + "), ignored");
             }
         }
     }
@@ -555,7 +555,7 @@ PanelWindow {
             _warnUnknownKeys(styleRaw, "global style");
             return { styleRaw: styleRaw, items: _sanitizeItems(rawItems, "") };
         } catch (e) {
-            console.warn("ring-app: unreadable config", e);
+            console.warn("appring: unreadable config", e);
             return { styleRaw: {}, items: [] };
         }
     }
@@ -626,7 +626,7 @@ PanelWindow {
     function _dumpState() {
         if (!root._dump)
             return;
-        console.info("ring-app state " + JSON.stringify({
+        console.info("appring state " + JSON.stringify({
             visible: root._open,
             items: root._itemsDump(root.items, root.mainStyles),
             highlighted: root.highlightedIndex,
@@ -653,6 +653,15 @@ PanelWindow {
         }
     }
 
+    IpcHandler {
+        target: "appring"
+        function open(name: string): void { root.open(name); }
+        function commit(): void { root.commit(); }
+        function cancel(): void { root.cancel(); }
+        function toggle(name: string): void { root.toggle(name); }
+        function settings(): void { root.settingsRequested(); }
+    }
+    // the old target, from when the app was called ring-app: key binds keep working
     IpcHandler {
         target: "ring"
         function open(name: string): void { root.open(name); }

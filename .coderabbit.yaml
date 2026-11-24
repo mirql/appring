@@ -22,14 +22,14 @@ reviews:
     - "!assets/**/*.ico"
     - "!assets/**/*.icns"
   path_instructions:
-    - path: "ring/Radial.qml"
+    - path: "appring/Radial.qml"
       instructions: |
         The behaviour: reading menu.json, picking by angle, committing. A `run` item
         starts as an argv list (Quickshell.execDetached), never through a shell: flag
         anything that joins arguments into a string or adds `sh -c`. A new config key
         or setting needs its line in the README's "Your menu"; a new environment
-        variable or IPC call needs ring/shell.qml's header.
-    - path: "ring/**"
+        variable or IPC call needs appring/shell.qml's header.
+    - path: "appring/**"
       instructions: |
         A behaviour change needs its step in tools/gallery.sh and its expectation in
         tools/check-radial.py, the README updated where it describes that behaviour, and

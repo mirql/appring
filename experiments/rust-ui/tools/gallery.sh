@@ -13,7 +13,7 @@
 set -uo pipefail
 
 HERE="$(cd "$(dirname "$0")/.." && pwd)"
-OUT="${GALLERY_OUT:-/tmp/ring-app-experiments-gallery}"
+OUT="${GALLERY_OUT:-/tmp/appring-experiments-gallery}"
 mkdir -p "$OUT"
 
 TOOLKITS=("$@")
@@ -38,7 +38,7 @@ bin_for() {
 # an earlier version of this script used "$tk" directly and never found
 # the (correctly open, working) socket because of this mismatch.
 # egui-layershell deliberately kept its own hyphen in its socket name
-# (ring-app-spike-egui-layershell.sock), precisely so it needs no entry
+# (appring-spike-egui-layershell.sock), precisely so it needs no entry
 # here -- the default branch below already echoes "$1" verbatim.
 sock_suffix_for() {
   case "$1" in
@@ -98,7 +98,7 @@ run_one() {
     "$bin" > "$D/daemon.log" 2>&1 &
     daemon_pid=$!
     echo "$daemon_pid" > "$D/daemon.pid"
-    sock="$XDG_RUNTIME_DIR/ring-app-spike-$(sock_suffix_for "$tk").sock"
+    sock="$XDG_RUNTIME_DIR/appring-spike-$(sock_suffix_for "$tk").sock"
     # cxx-qt (QML/shader setup on first run) can take noticeably longer to
     # open its socket than egui under load on a shared host -- checked.
     for _ in $(seq 200); do [ -S "$sock" ] && break; sleep 0.1; done
