@@ -618,16 +618,16 @@ ipc cancel
 mkdir -p "$D/home-late/ring-app"
 cat > "$D/home-late/ring-app/menu.json" <<'MENUJSON'
 [
-  { "label": "Old", "icon": "folder", "run": ["true"] },
+  { "label": "Old", "icon": "folder", "run": ["notify-send", "late old"] },
   { "label": "Old group", "icon": "folder", "items": [
-    { "label": "Old A", "icon": "text-x-generic", "run": ["true"] },
-    { "label": "Old B", "icon": "text-x-generic", "run": ["true"] }
+    { "label": "Old A", "icon": "text-x-generic", "run": ["notify-send", "late old a"] },
+    { "label": "Old B", "icon": "text-x-generic", "run": ["notify-send", "late old b"] }
   ] }
 ]
 MENUJSON
 new_menu() {
   mkdir -p "$D/home-late/appring"
-  echo '[{ "label": "New", "icon": "folder", "run": ["true"] }]' > "$D/home-late/appring/menu.json"
+  echo '[{ "label": "New", "icon": "folder", "run": ["notify-send", "late new"] }]' > "$D/home-late/appring/menu.json"
 }
 restart_with_config_home "$D/home-late"
 at $cx $cy
