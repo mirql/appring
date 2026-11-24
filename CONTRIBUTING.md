@@ -10,6 +10,8 @@ We try to be kind, humble and curious here, and ask the same of everyone who joi
 
 - **Bugs:** open an issue with the bug template.
 - **Features:** open an issue first, so we can agree on the shape before you write code.
+- **New here?** The [good first issues](https://github.com/mirql/appring/labels/good%20first%20issue)
+  are small and stand alone: each says where to start and what done looks like.
 - **Security problems:** do not open an issue. See [SECURITY.md](SECURITY.md).
 
 ## Development

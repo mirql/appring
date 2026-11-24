@@ -5,7 +5,20 @@
 <p align="center">
   <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue"></a>
   <img alt="Platform: Linux (Wayland)" src="https://img.shields.io/badge/platform-Linux%20(Wayland)-lightgrey">
+  <a href="https://quickshell.org"><img alt="Built on Quickshell" src="https://img.shields.io/badge/built%20on-Quickshell-8A2BE2"></a>
+  <a href="#install"><img alt="Tested on Hyprland" src="https://img.shields.io/badge/tested%20on-Hyprland-58E1FF?logo=hyprland&logoColor=white"></a>
+  <br>
+  <a href="https://github.com/mirql/appring/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/mirql/appring"></a>
+  <a href="https://github.com/mirql/appring/commits/main"><img alt="Last commit" src="https://img.shields.io/github/last-commit/mirql/appring"></a>
+  <a href="https://github.com/mirql/appring/graphs/commit-activity"><img alt="Commit activity" src="https://img.shields.io/github/commit-activity/m/mirql/appring"></a>
+  <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+<a href="#contributors"><img alt="All contributors" src="https://img.shields.io/badge/all_contributors-1-orange"></a>
+<!-- ALL-CONTRIBUTORS-BADGE:END -->
 </p>
+
+> *Once you've cast spells with **OPie**, opening Firefox the normal way just feels **slow**.*
+>
+> — **Askar**, author of appring
 
 **appring** is a radial menu. Hold a key: a ring of buttons appears around the pointer. Point in a direction
 (the whole slice of the screen counts, never a small target), then release the
@@ -23,10 +36,23 @@ just commit                          # run the highlighted item (bind this to th
 ```
 
 > [!NOTE]
-> appring is young (0.1, unreleased). It runs on Linux with a Wayland
-> compositor that has wlr-layer-shell (Hyprland, Sway, niri and others), built on
-> [Quickshell](https://quickshell.org). macOS and Windows are planned, not started.
+> appring is young (0.1, unreleased). It runs on Linux under Wayland, built on
+> [Quickshell](https://quickshell.org). For now we build and test it under Hyprland;
+> other compositors have not been tried yet. macOS and Windows are planned, not started.
 > There is no package yet: you run it from a checkout.
+
+## Why
+
+Launchers make you type, docks and menus make you aim. A radial menu asks for
+neither: your hand learns the directions, and after a few days you pick an item
+without looking.
+
+- **Directions, not targets.** The whole slice of the screen counts, so a quick
+  flick is enough.
+- **Your menu, your way.** Apps and commands from a JSON file, groups for the rest,
+  a style per item if you want one.
+- **Out of the way.** Nothing on screen until you hold the key, gone when you
+  release it.
 
 ## Install
 
@@ -77,6 +103,15 @@ Settings by environment: `RING_APP_RELEASE_KEY` (`Super`, `Alt`, `Ctrl`, `Shift`
 `RING_APP_REST_MS` (resting on a group opens it, default 250),
 `RING_APP_REDUCED_MOTION=1`. More in [`ring/shell.qml`](ring/shell.qml).
 
+## Limits
+
+> [!WARNING]
+> appring runs what your menu file says, as you: treat `menu.json` like a shell
+> script. While open it is a full-screen overlay with keyboard focus; another program
+> in your Wayland session can draw a lookalike, and anything that can call
+> Quickshell's IPC as your user can open it and run the highlighted item. Linux and
+> Wayland only for now. More in [SECURITY.md](SECURITY.md).
+
 ## Development
 
 ```bash
@@ -91,6 +126,43 @@ virtual pointer, check every step and save screenshots. See
 prototypes in Rust (iced, cxx-qt, egui) and what they showed.
 
 Found a security problem? Please report it privately: [SECURITY.md](SECURITY.md).
+
+## Contributing
+
+Issues, ideas and PRs are welcome. Good places to start:
+
+- **[Good first issues](https://github.com/mirql/appring/labels/good%20first%20issue).**
+  Small, self-contained tasks, each saying where to start and what done looks like.
+- **Other compositors.** Try it on Sway, niri or another wlr-layer-shell compositor
+  and tell us what happens, or add a test for it.
+- **Menus and styles.** A menu you like, or a style that looks good, makes a fine
+  example for others.
+
+Questions go to [Discussions](https://github.com/mirql/appring/discussions).
+
+## Contributors
+
+Thanks to everyone who makes appring what it is
+([emoji key](https://allcontributors.org/docs/en/emoji-key)):
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/askaramirov"><img src="https://avatars.githubusercontent.com/u/59274133?size=80" width="80px" height="80px" alt="Askar Amirov"/><br /><sub><b>Askar Amirov</b></sub></a><br /><a href="https://github.com/mirql/appring/commits?author=askaramirov" title="Code">💻</a> <a href="https://github.com/mirql/appring/commits?author=askaramirov" title="Documentation">📖</a> <a href="#design-askaramirov" title="Design">🎨</a> <a href="https://github.com/mirql/appring/commits?author=askaramirov" title="Tests">⚠️</a> <a href="#ideas-askaramirov" title="Ideas, Planning, & Feedback">🤔</a> <a href="#maintenance-askaramirov" title="Maintenance">🚧</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+Helped in a way that isn't a commit? Comment on any issue or PR:
+`@all-contributors please add @name for ideas, review` (and so on).
 
 ## License
 
