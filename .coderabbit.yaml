@@ -32,7 +32,8 @@ reviews:
     - path: "ring/**"
       instructions: |
         A behaviour change needs its step in tools/gallery.sh and its expectation in
-        tools/check-radial.py, and a CHANGELOG line under Unreleased.
+        tools/check-radial.py, the README updated where it describes that behaviour, and
+        a CHANGELOG line under Unreleased, all in the same PR.
     - path: "tools/**"
       instructions: |
         The off-screen tests: a headless sway, a private D-Bus, fake apps. Nothing may
@@ -42,7 +43,7 @@ reviews:
     - path: "experiments/**"
       instructions: "Old prototypes, not maintained and not in `just check`: review lightly."
     - path: "**/*.md"
-      instructions: "If behaviour changes, the README and a CHANGELOG line under Unreleased change in the same PR. No host names, local paths or private names: the repo is public."
+      instructions: "No host names, local paths or private names: the repo is public."
 
 chat:
   auto_reply: true
