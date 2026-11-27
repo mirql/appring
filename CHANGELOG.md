@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.2.0
+
 - Groups work as in OPie: a group's button shows one of its items and runs it, the
   mouse wheel turns to the next, resting on it shows the rest as a ghost ring you can
   pick from (the one run becomes the face), a middle click jumps into the group and
