@@ -12,7 +12,7 @@
   <a href="https://github.com/mirql/appring/commits/main"><img alt="Last commit" src="https://img.shields.io/github/last-commit/mirql/appring"></a>
   <a href="https://github.com/mirql/appring/graphs/commit-activity"><img alt="Commit activity" src="https://img.shields.io/github/commit-activity/m/mirql/appring"></a>
   <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-<a href="#contributors"><img alt="All contributors" src="https://img.shields.io/badge/all_contributors-1-orange"></a>
+<a href="#contributors"><img alt="All contributors" src="https://img.shields.io/badge/all_contributors-2-orange"></a>
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 </p>
 
@@ -278,6 +278,7 @@ Thanks to everyone who makes appring what it is
   <tbody>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/askaramirov"><img src="https://avatars.githubusercontent.com/u/59274133?size=80" width="80px" height="80px" alt="Askar Amirov"/><br /><sub><b>Askar Amirov</b></sub></a><br /><a href="https://github.com/mirql/appring/commits?author=askaramirov" title="Code">💻</a> <a href="https://github.com/mirql/appring/commits?author=askaramirov" title="Documentation">📖</a> <a href="#design-askaramirov" title="Design">🎨</a> <a href="https://github.com/mirql/appring/commits?author=askaramirov" title="Tests">⚠️</a> <a href="#ideas-askaramirov" title="Ideas, Planning, & Feedback">🤔</a> <a href="#maintenance-askaramirov" title="Maintenance">🚧</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/ggeser"><img src="https://avatars.githubusercontent.com/u/1264908?size=80" width="80px" height="80px" alt="Serg"/><br /><sub><b>Serg</b></sub></a><br /><a href="https://github.com/mirql/appring/commits?author=ggeser" title="Code">💻</a> <a href="#platform-ggeser" title="Packaging/porting to new platform">📦</a> <a href="https://github.com/mirql/appring/commits?author=ggeser" title="Tests">⚠️</a> <a href="https://github.com/mirql/appring/commits?author=ggeser" title="Documentation">📖</a></td>
     </tr>
   </tbody>
 </table>
