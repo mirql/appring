@@ -27,6 +27,18 @@
         "ideas",
         "maintenance"
       ]
+    },
+    {
+      "login": "ggeser",
+      "name": "Serg",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1264908",
+      "profile": "https://github.com/ggeser",
+      "contributions": [
+        "code",
+        "platform",
+        "test",
+        "doc"
+      ]
     }
   ]
 }
