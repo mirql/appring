@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- macOS, experimental: its own menu-bar app in `macos/` (Quickshell stays the Linux app). Same `menu.json`: hold a key, point, release to run, groups as a smaller ring. The hold key needs Accessibility permission. The appearance window and its animations are not on macOS yet; `settings` opens the menu file.
+- macOS: a style number `0` or `1` is kept, a click uses the pointer at that moment, and the hold key is tried again after Accessibility is granted.
+
 ## 0.2.0
 
 - Groups work as in OPie: a group's button shows one of its items and runs it, the

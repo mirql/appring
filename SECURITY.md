@@ -25,6 +25,10 @@ yours, and the ring runs what it says.
   ring does not defend against that.
 - Anyone who can call Quickshell's IPC as your user can open the ring and
   commit its highlighted item.
+- On macOS, another process running as you can talk to the command socket
+  `appring.sock` in your own temporary folder (mode 0600) and open, commit
+  or stop the ring.
+  The socket is not a privilege boundary between your own programs.
 
 ## Supported versions
 

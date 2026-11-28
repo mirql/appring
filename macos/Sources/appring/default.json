@@ -1,0 +1,10 @@
+[
+  { "label": "Safari", "icon": "safari", "run": ["open", "-a", "Safari"] },
+  { "label": "Terminal", "icon": "utilities-terminal", "run": ["open", "-a", "Terminal"] },
+  { "label": "Finder", "icon": "finder", "run": ["open", "-a", "Finder"] },
+  { "label": "Tools", "icon": "applications-utilities", "items": [
+    { "label": "Say hello", "icon": "dialog-information", "run": ["osascript", "-e", "display notification \"Hello from the ring\" with title \"appring\""] },
+    { "label": "Calculator", "icon": "accessories-calculator", "run": ["open", "-a", "Calculator"] },
+    { "label": "Activity Monitor", "icon": "utilities-system-monitor", "run": ["open", "-a", "Activity Monitor"] }
+  ] }
+]

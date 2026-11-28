@@ -39,6 +39,7 @@ To try the ring on your own Wayland desktop: `just run`, then `just open`.
 | `tools/package-check.sh` | Checks a built package off-screen (`just test-package`) |
 | `tools/` (the rest) | Test helpers: a virtual pointer, a fake Hyprland IPC, a fake app, a process reaper |
 | `experiments/` | Earlier prototypes, not maintained, not in `just check` |
+| `macos/` | The experimental macOS menu-bar app (Swift). `swift run --package-path macos appring-core-tests`. Not part of `just check` |
 | `assets/` | The logo set and app icons for Linux, Windows and macOS ([assets/README.md](assets/README.md)) |
 
 ## Pull requests
